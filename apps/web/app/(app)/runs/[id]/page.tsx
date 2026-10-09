@@ -5,11 +5,11 @@ import { notFound } from "next/navigation";
 import { ResultsExplorer, type CaseInfo } from "@/components/run/results-explorer";
 import { AdminButton } from "@/components/admin/admin-button";
 import { Card, Chip, CiBar, KV, RunStatusChip, Stat, TriggerChip } from "@/components/ui/primitives";
-import { ago, ciPts, dateTime, ms, pValue, pct, sha, signedPts, usd } from "@/lib/format";
+import { ago, ciPts, dateTime, hasRate, ms, pValue, pct, qualityN, rated, sha, signedPts, usd } from "@/lib/format";
+import { JsonView } from "@/components/ui/interactive";
 import { LAYERS, agentName } from "@/lib/meta";
 import { getStore } from "@/lib/server/store";
 
-export const revalidate = 30;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -86,10 +86,20 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
             </div>
           </div>
 
-          {s && (
+          {s && !hasRate(s) && !s.error && (
+            <div className="mt-8 border-t border-line pt-6">
+              <p className="serif text-lg italic text-ink-2">
+                {run.trigger === "optimizer" ? "Optimizer evaluation slice — per-case scores are stored on the candidates of the experiment." : "No pass rate recorded for this run yet."}
+              </p>
+              <div className="mt-3">
+                <JsonView label="summary" value={s} />
+              </div>
+            </div>
+          )}
+          {rated(s) && (
             <div className="mt-8 grid gap-6 border-t border-line pt-6 sm:grid-cols-2 lg:grid-cols-5">
               <div className="sm:col-span-2">
-                <Stat label="Pass" value={`${s.passed}/${s.n_results}`} sub={`${pct(s.pass_rate)} · 95% ${pct(s.ci[0])}–${pct(s.ci[1])}`} tone="pass" />
+                <Stat label="Pass · quality cases" value={`${s.passed}/${qualityN(s)}`} sub={`${pct(s.pass_rate)} · 95% ${pct(s.ci[0])}–${pct(s.ci[1])}${s.redteam ? ` · + ${s.redteam.n} attacks` : ""}`} tone="pass" />
                 <CiBar className="mt-3" rate={s.pass_rate} ci={s.ci} tone="pass" />
               </div>
               <Stat

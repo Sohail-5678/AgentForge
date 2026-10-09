@@ -4,7 +4,6 @@ import { Empty, PageHeader } from "@/components/ui/primitives";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Review queue" };
-export const revalidate = 30;
 
 export default async function ReviewPage() {
   const all = await getStore().reviews();

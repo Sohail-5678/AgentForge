@@ -244,9 +244,42 @@ function Row({ k, children }: { k: string; children: React.ReactNode }) {
   );
 }
 
+type Check = { key?: string; name?: string; expected?: unknown; actual?: unknown; passed?: boolean; ok?: boolean };
+
+function isCheckList(v: unknown): v is Check[] {
+  return Array.isArray(v) && v.length > 0 && v.every((x) => x && typeof x === "object" && ("key" in x || "name" in x));
+}
+
+function short(v: unknown) {
+  const s = typeof v === "string" ? v : JSON.stringify(v);
+  return s && s.length > 40 ? `${s.slice(0, 40)}…` : s;
+}
+
 function DetailSummary({ details }: { details: Record<string, unknown> }) {
   const entries = Object.entries(details ?? {}).filter(([, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0));
   if (!entries.length) return <span className="text-muted">—</span>;
+  const checks = entries.find(([, v]) => isCheckList(v));
+  if (checks) {
+    const list = checks[1] as Check[];
+    return (
+      <ul className="flex flex-col gap-0.5">
+        {list.slice(0, 6).map((c, i) => {
+          const ok = c.passed ?? c.ok ?? (c.expected !== undefined ? JSON.stringify(c.expected) === JSON.stringify(c.actual) : true);
+          return (
+            <li key={i} className="flex items-center gap-1.5 truncate font-mono text-[0.64rem]" title={`${c.key ?? c.name}: expected ${JSON.stringify(c.expected)} · actual ${JSON.stringify(c.actual)}`}>
+              <span className={ok ? "text-pass" : "text-accent"}>{ok ? "✓" : "✗"}</span>
+              <span className="text-ink-2">{c.key ?? c.name}</span>
+              {!ok && c.expected !== undefined && (
+                <span className="truncate text-muted">
+                  {short(c.expected)} → <span className="text-accent-ink">{short(c.actual)}</span>
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
   return (
     <div className="flex flex-col gap-0.5">
       {entries.slice(0, 4).map(([k, v]) => (

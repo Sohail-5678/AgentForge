@@ -32,7 +32,9 @@ export async function redteamSummary(agentFilter?: string) {
   const trend: Record<string, { at: string; asr: number; seq: number; profile_id: string }[]> = {};
   for (const a of agents) {
     const runs = (await store.runs({ agent: a.id, status: "done", limit: 200 })).filter((r) => r.summary?.redteam);
-    if (runs[0]) latest.push(runs[0]);
+    // The heatmap describes what is live: the latest nightly / manual sweep, not PR commits or gate candidates.
+    const current = runs.find((r) => r.trigger === "nightly" || r.trigger === "manual") ?? runs[0];
+    if (current) latest.push(current);
     trend[a.id] = runs
       .filter((r) => r.trigger === "nightly")
       .slice(0, 30)

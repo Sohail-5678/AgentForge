@@ -184,6 +184,10 @@ body::after {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum", "cv11";
 }
+/* Numbers set in display type keep their units' case ("5.8 s", "−2 pts", "p=0.006"). */
+.display.num {
+  text-transform: none;
+}
 
 /* Distressed neon title — grain eats into the letterforms like the NOCTURNE print. */
 .grunge {
@@ -358,4 +362,13 @@ body::after {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Page transition for dashboard routes (app/(app)/template.tsx). Content is never hidden waiting for JS. */
+@keyframes page-enter {
+  from { opacity: 0.001; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.page-enter {
+  animation: page-enter 0.5s var(--ease-out-expo) both;
 }

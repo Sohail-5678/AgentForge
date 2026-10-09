@@ -11,7 +11,6 @@ import { profileMap } from "@/lib/server/queries";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Optimizer" };
-export const revalidate = 60;
 
 const STATUS_TONE: Record<string, "pass" | "info" | "warn" | "accent" | undefined> = { running: "info", finished: "pass", paused: "warn", failed: "accent", cancelled: undefined };
 

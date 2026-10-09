@@ -79,7 +79,7 @@ export function ExperimentExplorer({ candidates, seedBody, configPoints, bestId 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.25fr_1fr]">
       <div className="card p-6">
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 className="serif text-2xl text-ink">Candidate tree</h2>
           <span className="kicker">minibatch Δ vs parent · ring = Pareto front</span>
         </div>
@@ -146,7 +146,7 @@ export function ExperimentExplorer({ candidates, seedBody, configPoints, bestId 
       </div>
 
       <div className="card p-6">
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 className="serif text-2xl text-ink">Pareto front</h2>
           <span className="kicker">val pass rate vs list-price cost / case</span>
         </div>

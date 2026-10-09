@@ -59,7 +59,7 @@ export function RedteamExplorer({
     <div className="grid gap-5 2xl:grid-cols-[1.15fr_1fr]">
       {/* heatmap */}
       <div className="card overflow-hidden p-6">
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 className="serif text-2xl text-ink">Attack success heatmap</h2>
           <span className="kicker">click a cell</span>
         </div>
@@ -132,7 +132,7 @@ export function RedteamExplorer({
 
         {/* attribution */}
         <div className="mt-8 border-t border-line pt-6">
-          <div className="flex items-baseline justify-between">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <h3 className="serif text-xl text-ink">Which layer stopped it</h3>
             <span className="kicker">first blocked span · §8.6</span>
           </div>

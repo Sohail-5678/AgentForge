@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, CiBar, Empty, PageHeader, RunStatusChip, TriggerChip } from "@/components/ui/primitives";
 import { FilterBar } from "@/components/ui/filter-bar";
-import { ago, ms, pct, sha, usd } from "@/lib/format";
+import { ago, ms, pct, qualityN, rated, sha, usd } from "@/lib/format";
 import { agentName } from "@/lib/meta";
 import { profileMap } from "@/lib/server/queries";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Runs" };
-export const revalidate = 30;
 
 const PAGE = 40;
 
@@ -73,6 +72,7 @@ export default async function RunsPage({ searchParams }: { searchParams: Promise
               <tbody>
                 {runs.map((r) => {
                   const s = r.summary;
+                  const rs = rated(s) ? s : null;
                   const prof = profiles.get(r.profile_id);
                   const dur = r.finished_at ? new Date(r.finished_at).getTime() - new Date(r.created_at).getTime() : null;
                   return (
@@ -94,18 +94,18 @@ export default async function RunsPage({ searchParams }: { searchParams: Promise
                         <RunStatusChip status={r.status} />
                       </td>
                       <td>
-                        {s ? (
+                        {rs ? (
                           <div>
                             <div className="flex items-baseline justify-between font-mono text-[0.72rem] num">
-                              <span className="text-ink">{pct(s.pass_rate)}</span>
+                              <span className="text-ink">{pct(rs.pass_rate)}</span>
                               <span className="text-muted">
-                                {pct(s.ci[0])}–{pct(s.ci[1])} · n={s.n_results}
+                                {pct(rs.ci[0])}–{pct(rs.ci[1])} · n={qualityN(rs)}
                               </span>
                             </div>
-                            <CiBar className="mt-1.5 !h-1" rate={s.pass_rate} ci={s.ci} tone="pass" />
+                            <CiBar className="mt-1.5 !h-1" rate={rs.pass_rate} ci={rs.ci} tone="pass" />
                           </div>
                         ) : (
-                          <span className="text-muted">—</span>
+                          <span className="font-mono text-[0.68rem] text-muted">{s?.error ? "error" : r.trigger === "optimizer" && s ? `${s.n_results} evals · scored on candidate` : "—"}</span>
                         )}
                       </td>
                       <td className="font-mono text-[0.72rem] text-ink-2 num">{usd(s?.cost?.mean_list_price_usd)}</td>

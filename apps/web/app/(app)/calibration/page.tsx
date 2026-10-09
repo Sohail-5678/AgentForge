@@ -7,7 +7,6 @@ import { getStore } from "@/lib/server/store";
 import { cohensKappa } from "@/lib/stats";
 
 export const metadata: Metadata = { title: "Calibration" };
-export const revalidate = 120;
 
 export default async function CalibrationPage() {
   const store = getStore();

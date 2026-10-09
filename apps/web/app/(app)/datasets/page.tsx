@@ -8,7 +8,6 @@ import { agentName } from "@/lib/meta";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Datasets" };
-export const revalidate = 120;
 
 const KIND_NOTE: Record<string, string> = {
   benchmark: "BIRD Mini-Dev subset · execution accuracy",

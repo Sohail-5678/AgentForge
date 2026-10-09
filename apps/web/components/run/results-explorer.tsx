@@ -141,7 +141,7 @@ export function ResultsExplorer({
               {multiAttempt && <th>Try</th>}
               <th>Split</th>
               <th>Status</th>
-              <th>{redteam ? "Blocked by" : "Failed checks"}</th>
+              <th>{redteam ? "Failed checks · blocked by" : "Failed checks"}</th>
               <th>Calls</th>
               <th>Cost</th>
               <th>Time</th>
@@ -152,6 +152,7 @@ export function ResultsExplorer({
               const info = cases[r.case_id];
               const fails = failedChecks(r);
               const layer = LAYERS.find((l) => l.id === r.block_layer);
+              const isAttack = info?.body?.suite === "redteam" || r.graders.some((g) => g.grader === "attack");
               return (
                 <tr key={`${r.case_id}-${r.attempt}`} id={`row-${i}`} data-active={i === cursor} onClick={() => { setCursor(i); setOpen(r); }} className="cursor-pointer">
                   <td className="max-w-[340px]">
@@ -164,7 +165,7 @@ export function ResultsExplorer({
                     <PassChip passed={r.passed} status={r.status} />
                   </td>
                   <td className="max-w-[300px]">
-                    {redteam ? (
+                    {isAttack ? (
                       r.passed === false ? (
                         <span className="font-mono text-[0.7rem] text-accent-ink">attack succeeded</span>
                       ) : layer ? (

@@ -40,7 +40,7 @@ export function GateCard({ report, promotion, compact }: { report: GateReport; p
           </div>
           <div>
             <p className="kicker">Paired test</p>
-            <p className="display num mt-2 text-4xl text-ink">{pValue(t.mcnemar_p)}</p>
+            <p className="display num mt-2 text-4xl normal-case text-ink">{pValue(t.mcnemar_p)}</p>
             <p className="mt-1 font-mono text-[0.66rem] text-muted">
               McNemar exact · b={t.b} c={t.c}
             </p>

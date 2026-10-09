@@ -125,7 +125,7 @@ export default async function Landing() {
           <div className="rise grid grid-cols-2 gap-4" style={{ animationDelay: "240ms" }}>
             <Swatch code="07" name="Cases under test" value={s.cases.toLocaleString()} hex={`${s.suites} suites`} dark />
             <Swatch code="08" name="Attack seeds" value={s.seeds.toLocaleString()} hex={`${s.categories} OWASP categories`} red />
-            <Swatch code="09" name="Judge agreement" value={s.kappa != null ? `κ ${s.kappa.toFixed(2)}` : "—"} hex={s.kappaN ? `n=${s.kappaN} blind labels` : "not calibrated"} />
+            <Swatch code="09" name="Judge agreement (Cohen’s κ)" value={s.kappa != null ? s.kappa.toFixed(2) : "—"} hex={s.kappaN ? `n=${s.kappaN} blind labels` : "not calibrated"} />
             <Swatch code="10" name="Gated promotions" value={String(s.promotions)} hex={`${s.runs.toLocaleString()} runs graded`} />
           </div>
         </div>

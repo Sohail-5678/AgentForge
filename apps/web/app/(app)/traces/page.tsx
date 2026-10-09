@@ -7,7 +7,6 @@ import { agentName } from "@/lib/meta";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Traces" };
-export const revalidate = 30;
 
 export default async function TracesPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;

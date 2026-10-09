@@ -3,6 +3,10 @@ import { ViewerProvider } from "@/components/admin/viewer";
 import { Sidebar, type ShellInfo } from "@/components/shell/sidebar";
 import { getStore } from "@/lib/server/store";
 
+// Per-viewer (session) and live data: every dashboard page renders on request. In snapshot mode that is an
+// in-memory read; with Neon it is what makes promotions and new runs show up immediately.
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const store = getStore();
   const [user, generatedAt, alerts, reviews] = await Promise.all([

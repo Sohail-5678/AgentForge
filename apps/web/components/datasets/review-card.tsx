@@ -22,6 +22,8 @@ export function ReviewCard({ review }: { review: CaseReview }) {
   const [busy, setBusy] = useState<null | "accept" | "reject">(null);
   const d = review.draft;
   const turns = Array.isArray(d.input?.turns) ? (d.input.turns as unknown[]) : null;
+  const firstInput = turns?.length ? (typeof turns[0] === "string" ? turns[0] : String((turns[0] as Record<string, unknown>)?.user ?? "")) : typeof d.input?.question === "string" ? d.input.question : "";
+  const heading = d.title && !d.title.startsWith("Mined:") ? d.title : firstInput || d.case_id;
 
   async function decide(decision: "accept" | "reject") {
     if (blocked) {
@@ -63,8 +65,11 @@ export function ReviewCard({ review }: { review: CaseReview }) {
           <p className="kicker">
             {AGENT_META[d.agent]?.name ?? d.agent} · cluster of {review.source_trace_ids.length} trace{review.source_trace_ids.length === 1 ? "" : "s"} · {ago(review.created_at)}
           </p>
-          <h3 className="serif mt-1 text-2xl leading-tight text-ink">{review.cluster_label ?? d.title ?? d.case_id}</h3>
-          <p className="mt-1 font-mono text-[0.68rem] text-muted">{d.case_id}</p>
+          <h3 className="serif mt-1 text-2xl leading-tight text-ink">{heading}</h3>
+          <p className="mt-1 font-mono text-[0.68rem] text-muted">
+            {d.case_id}
+            {review.cluster_label ? ` · cluster: ${review.cluster_label}` : ""}
+          </p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <Chip tone={review.status === "accepted" ? "pass" : review.status === "rejected" ? "accent" : "warn"}>{review.status}</Chip>

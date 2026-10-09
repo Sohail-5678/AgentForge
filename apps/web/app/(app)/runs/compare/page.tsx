@@ -65,7 +65,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             </div>
             <div>
               <p className="kicker">McNemar exact</p>
-              <p className="display num mt-2 text-5xl text-ink">{pValue(c.p_value)}</p>
+              <p className="display num mt-2 text-5xl normal-case text-ink">{pValue(c.p_value)}</p>
               <p className="mt-1 font-mono text-[0.66rem] text-muted">b={c.b} (A✓ B✗) · c={c.c} (A✗ B✓)</p>
             </div>
           </div>

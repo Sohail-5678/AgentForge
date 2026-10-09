@@ -5,13 +5,12 @@ import { TrendChart } from "@/components/charts/trend-chart";
 import { SpotlightCard } from "@/components/ui/interactive";
 import { ButtonLink, Card, CardHead, Chip, CiBar, Empty, Meter, PageHeader } from "@/components/ui/primitives";
 import { Sparkline } from "@/components/ui/sparkline";
-import { ago, cn, dateShort, ms, pct, pctCi, usd } from "@/lib/format";
+import { ago, cn, dateShort, ms, pct, pctCi, qualityN, rated, usd } from "@/lib/format";
 import { AGENT_META, agentName } from "@/lib/meta";
 import { DAILY_CAPS, agentCards, latestDay, openAlerts, profileMap, usageByPurpose } from "@/lib/server/queries";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Overview" };
-export const revalidate = 60;
 
 export default async function OverviewPage() {
   const store = getStore();
@@ -81,7 +80,7 @@ export default async function OverviewPage() {
       ) : (
         <div className="grid gap-5 xl:grid-cols-2">
           {main.map((c, i) => {
-            const s = c.lastNightly?.summary;
+            const s = rated(c.lastNightly?.summary) ? c.lastNightly!.summary! as NonNullable<typeof c.lastNightly>["summary"] & { pass_rate: number; ci: [number, number] } : null;
             const meta = AGENT_META[c.agent.id];
             const rt = s?.redteam;
             return (
@@ -104,7 +103,7 @@ export default async function OverviewPage() {
                     <p className="kicker">Last nightly pass rate</p>
                     <p className="display num mt-2 text-[4.2rem] leading-[0.85] text-ink">{s ? pct(s.pass_rate) : "—"}</p>
                     <p className="mt-2 font-mono text-[0.68rem] text-muted num">
-                      {s ? `95% ${pct(s.ci[0])}–${pct(s.ci[1])} · n=${s.n_results}` : "no runs"}
+                      {s ? `95% ${pct(s.ci[0])}–${pct(s.ci[1])} · n=${qualityN(s)}` : "no runs"}
                     </p>
                     {s && <CiBar className="mt-3" rate={s.pass_rate} ci={s.ci} tone="pass" />}
                   </div>
@@ -211,7 +210,7 @@ export default async function OverviewPage() {
                   <Chip tone={c.calibrated ? "pass" : "warn"}>{c.calibrated ? "calibrated" : "not calibrated"}</Chip>
                 </div>
                 <div className="mt-2 flex items-end gap-4">
-                  <p className="display num text-4xl text-ink">κ {c.kappa.toFixed(2)}</p>
+                  <p className="display num text-4xl text-ink"><span className="serif mr-1 align-[0.08em] text-[0.8em] italic normal-case">κ</span>{c.kappa.toFixed(2)}</p>
                   <p className="pb-1 font-mono text-[0.65rem] text-muted">agreement {pct(c.agreement)} · n={c.n}</p>
                 </div>
                 <div className="relative mt-3 h-1.5 rounded-full bg-surface-3">
@@ -233,7 +232,7 @@ export default async function OverviewPage() {
               {reviews.slice(0, 3).map((r) => (
                 <li key={r.id} className="flex items-center gap-2 truncate text-[0.8rem] text-muted">
                   <Inbox className="size-3.5 shrink-0 text-accent" aria-hidden />
-                  <span className="truncate">{r.cluster_label ?? r.draft.title ?? r.draft.case_id}</span>
+                  <span className="truncate">{reviewTitle(r.draft)}</span>
                 </li>
               ))}
             </ul>
@@ -254,6 +253,15 @@ export default async function OverviewPage() {
       </div>
     </div>
   );
+}
+
+function reviewTitle(d: { title?: string; case_id: string; input: Record<string, unknown> }) {
+  if (d.title && !d.title.startsWith("Mined:")) return d.title;
+  const turns = Array.isArray(d.input?.turns) ? (d.input.turns as unknown[]) : [];
+  const first = turns[0];
+  if (typeof first === "string") return first;
+  if (first && typeof first === "object" && typeof (first as Record<string, unknown>).user === "string") return (first as Record<string, string>).user;
+  return typeof d.input?.question === "string" ? d.input.question : d.case_id;
 }
 
 function Mini({ label, value, sub, tone }: { label: string; value: string; sub: string; tone?: "accent" | "pass" }) {

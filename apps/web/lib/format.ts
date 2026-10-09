@@ -97,3 +97,19 @@ export function sha(ref: string | null | undefined) {
 export function title(s: string) {
   return s.replace(/[_-]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
+
+/** A run summary that carries a pass rate with its interval (optimizer slices and failed runs do not). */
+export function rated<S extends { pass_rate?: number; ci?: [number, number] } | null | undefined>(s: S): s is NonNullable<S> & { pass_rate: number; ci: [number, number] } {
+  return !!s && typeof s.pass_rate === "number" && Array.isArray(s.ci) && s.ci.length === 2;
+}
+
+/** Same check without type narrowing — for "no rate" branches on data typed as always having one. */
+export function hasRate(s: { pass_rate?: number; ci?: [number, number] } | null | undefined): boolean {
+  return rated(s);
+}
+
+/** Denominator of summary.passed: quality results only (red-team cases have their own ASR). */
+export function qualityN(s: { n_quality?: number; n_results: number; attempts?: number; redteam?: { n: number } | null }) {
+  if (typeof s.n_quality === "number") return s.n_quality;
+  return Math.max(0, Math.round(s.n_results / Math.max(1, s.attempts ?? 1)) - (s.redteam?.n ?? 0));
+}

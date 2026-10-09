@@ -101,7 +101,7 @@ export function Stat({
       <p className="kicker">{label}</p>
       <p
         className={cn(
-          "display num mt-2 text-[2.4rem] leading-none",
+          "display num mt-2 text-[2.4rem] leading-none normal-case",
           tone === "accent" && "text-accent",
           tone === "pass" && "text-pass",
           tone === "warn" && "text-warn",

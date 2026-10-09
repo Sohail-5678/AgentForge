@@ -231,6 +231,8 @@ export interface RunSummary {
   suites?: string[];
   n_cases: number;
   n_results: number;
+  /** first-attempt quality (non-red-team) results that passed / pass_rate / ci are computed over */
+  n_quality?: number;
   attempts: number;
   passed: number;
   pass_rate: number;

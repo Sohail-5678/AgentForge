@@ -42,7 +42,7 @@ export function TrendChart({ series, height = 260, yLabel = "pass rate" }: { ser
             axisLine={false}
             tickFormatter={(v: number) => `${Math.round(v * 100)}%`}
             width={52}
-            label={{ value: yLabel, angle: -90, position: "insideLeft", offset: 22, style: { fill: "var(--muted)", fontSize: 9, letterSpacing: "0.12em" } }}
+            aria-label={yLabel}
           />
           <Tooltip
             cursor={{ stroke: "var(--line-strong)" }}

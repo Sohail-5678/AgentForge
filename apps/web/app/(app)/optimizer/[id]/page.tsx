@@ -11,7 +11,6 @@ import { ago, dateTime } from "@/lib/format";
 import { agentName } from "@/lib/meta";
 import { getStore } from "@/lib/server/store";
 
-export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const exp = await getStore().experiment((await params).id);

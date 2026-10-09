@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, createHmac } from "node:crypto";
-import { pct, signedPts } from "@/lib/format";
+import { pct, qualityN, signedPts } from "@/lib/format";
 import { comparePaired } from "@/lib/stats";
 import type { Case, Profile, ProfileBody, Run, RunSummary, SuiteVersion } from "@/lib/types";
 import { computeGateReport } from "./gate";
@@ -120,14 +120,23 @@ export async function runnerConfig(runId: string) {
   const store = getStore();
   const run = await store.run(runId);
   if (!run) throw new HttpError(404, "not_found", "Run not found.");
-  const [agents, profile, versions] = await Promise.all([store.agents(), store.profile(run.profile_id), store.suiteVersionsByIds(run.suite_version_ids)]);
+  const [agents, profile, versions, calibrations] = await Promise.all([
+    store.agents(),
+    store.profile(run.profile_id),
+    store.suiteVersionsByIds(run.suite_version_ids),
+    store.calibrations(),
+  ]);
   const agent = agents.find((a) => a.id === run.agent_id)!;
   const caseIds = [...new Set(versions.flatMap((v) => v.case_ids))];
   const cases = await store.casesByIds(caseIds);
+  const cal = calibrations.find((c) => c.agent_id === agent.id);
   return {
     run,
     agent,
     profile: profile?.body ?? null,
+    // The bundled toy agent is deterministic and offline; real targets use their own provider keys in the job.
+    fake_llm: agent.id === "toy" || process.env.AF_FAKE_LLM === "true",
+    judge: cal ? { calibrated: cal.calibrated, kappa: cal.kappa, n: cal.n, model: cal.judge_model } : { calibrated: false },
     suites: versions.map((v) => ({ id: v.id, suite_id: v.suite_id, hash: v.hash })),
     cases: cases.map((c) => ({ ...c.body, split: c.split })),
     canaries: canariesFor(run.id),
@@ -217,7 +226,7 @@ async function reportPr(run: Run, s: RunSummary | null, failure?: string) {
     "",
     `| | value |`,
     `|---|---|`,
-    `| Pass rate | ${pct(s.pass_rate)} (95% CI ${pct(s.ci[0])}–${pct(s.ci[1])}), n=${s.n_results} |`,
+    `| Pass rate | ${pct(s.pass_rate)} (95% CI ${pct(s.ci[0])}–${pct(s.ci[1])}), n=${qualityN(s)} |`,
     c ? `| vs main nightly | ${signedPts(c.diff)} (95% CI ${(c.diff_ci[0] * 100).toFixed(0)} to ${(c.diff_ci[1] * 100).toFixed(0)} pts), McNemar p=${c.p_value.toFixed(3)}, ${c.shared} shared cases |` : "| vs main nightly | no baseline yet |",
     s.redteam ? `| Attack success | ${pct(s.redteam.asr, 1)} (${s.redteam.succeeded}/${s.redteam.n}) |` : "",
     `| Hard failures | ${hard} |`,

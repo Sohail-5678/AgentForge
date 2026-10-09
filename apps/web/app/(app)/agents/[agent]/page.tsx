@@ -7,13 +7,12 @@ import { TrendChart } from "@/components/charts/trend-chart";
 import { ProfileDiff } from "@/components/optimizer/profile-diff";
 import { JsonView } from "@/components/ui/interactive";
 import { Card, CardHead, Chip, CiBar, PageHeader, TraceStatusChip } from "@/components/ui/primitives";
-import { cn, dateShort, pct } from "@/lib/format";
+import { cn, dateShort, pct, rated } from "@/lib/format";
 import { AGENT_META } from "@/lib/meta";
 import { nightlyRuns } from "@/lib/server/queries";
 import { getStore } from "@/lib/server/store";
 import type { Run } from "@/lib/types";
 
-export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ agent: string }> }): Promise<Metadata> {
   const { agent } = await params;
@@ -37,7 +36,7 @@ export default async function AgentPage({ params }: { params: Promise<{ agent: s
   const meta = AGENT_META[agentId];
   // Suite score per profile version: the latest finished nightly on that profile.
   const byProfile = new Map<string, Run>();
-  for (const r of runs) if (r.trigger === "nightly" && !byProfile.has(r.profile_id)) byProfile.set(r.profile_id, r);
+  for (const r of runs) if (r.trigger === "nightly" && rated(r.summary) && !byProfile.has(r.profile_id)) byProfile.set(r.profile_id, r);
   const statusCounts = live.items.reduce<Record<string, number>>((m, t) => ((m[t.status] = (m[t.status] ?? 0) + 1), m), {});
   const thumbs = live.items.filter((t) => t.feedback?.thumbs != null);
   const down = thumbs.filter((t) => (t.feedback?.thumbs ?? 0) < 0).length;
@@ -104,7 +103,7 @@ export default async function AgentPage({ params }: { params: Promise<{ agent: s
             {Object.entries(statusCounts)
               .sort((a, b) => b[1] - a[1])
               .map(([s, n]) => (
-                <li key={s} className="grid grid-cols-[110px_1fr_40px] items-center gap-3">
+                <li key={s} className="grid grid-cols-[132px_1fr_40px] items-center gap-3">
                   <TraceStatusChip status={s} />
                   <div className="h-1.5 rounded-full bg-surface-3">
                     <div className="h-full rounded-full bg-ink-2/70" style={{ width: `${(n / Math.max(1, live.items.length)) * 100}%` }} />

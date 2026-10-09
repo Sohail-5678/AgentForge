@@ -10,7 +10,6 @@ import { redteamSummary } from "@/lib/server/redteam";
 import { getStore } from "@/lib/server/store";
 
 export const metadata: Metadata = { title: "Red team" };
-export const revalidate = 60;
 
 export default async function RedteamPage() {
   const store = getStore();

@@ -9,6 +9,7 @@ import { signOutAction } from "@/app/actions";
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { cn } from "@/lib/format";
 import { NAV, isActive } from "./nav-items";
+import { CommandPalette } from "./command-palette";
 import { ThemeToggle } from "./theme";
 
 export interface ShellInfo {
@@ -79,7 +80,7 @@ function Footer({ info }: { info: ShellInfo }) {
       <div className="card !rounded-2xl p-3.5">
         <div className="flex items-center gap-2">
           <span className={cn("size-1.5 rounded-full pulse-dot", info.mode === "postgres" ? "bg-pass" : "bg-warn")} />
-          <span className="kicker !text-[0.58rem] !text-ink-2">{info.mode === "postgres" ? "Live · Neon" : "Demo snapshot"}</span>
+          <span className="kicker !text-[0.58rem] !text-ink-2">{info.mode === "postgres" ? "Live · Postgres" : "Demo snapshot"}</span>
         </div>
         <p className="mt-1.5 text-[0.72rem] leading-snug text-muted">
           {info.mode === "postgres"
@@ -134,10 +135,13 @@ export function Sidebar({ info }: { info: ShellInfo }) {
       {/* Desktop rail */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col justify-between border-r border-line bg-bg-2/80 px-5 py-6 backdrop-blur-xl lg:flex">
         <div className="flex min-h-0 flex-col gap-8">
-          <Link href="/" className="flex items-center gap-2.5 px-1" aria-label="AgentForge home">
-            <LogoMark />
-            <Wordmark />
-          </Link>
+          <div className="flex flex-col gap-5">
+            <Link href="/" className="flex items-center gap-2.5 px-1" aria-label="AgentForge home">
+              <LogoMark />
+              <Wordmark />
+            </Link>
+            <CommandPalette />
+          </div>
           <div className="-mr-3 min-h-0 overflow-y-auto pr-3">
             <NavList info={info} />
           </div>

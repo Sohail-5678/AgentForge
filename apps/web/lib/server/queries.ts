@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import type { Agent, Alert, LlmUsage, Profile, Promotion, Run } from "@/lib/types";
+import { rated } from "@/lib/format";
 import { getStore } from "./store";
 
 /** Page-shaped reads composed from the store. `cache` dedupes calls within one request. */
@@ -53,7 +54,7 @@ export interface AgentCardData {
 
 export const nightlyRuns = cache(async (agentId: string) => {
   const runs = await getStore().runs({ agent: agentId, trigger: "nightly", limit: NIGHTLY_LOOKBACK });
-  return runs.filter((r) => r.status === "done" && r.summary).reverse();
+  return runs.filter((r) => r.status === "done" && rated(r.summary)).reverse();
 });
 
 export const agentCards = cache(async (): Promise<AgentCardData[]> => {
@@ -68,7 +69,7 @@ export const agentCards = cache(async (): Promise<AgentCardData[]> => {
         store.traces({ agent: agent.id, mode: "live", limit: 500 }),
         store.countRuns({ agent: agent.id }),
       ]);
-      const lastNightly = nightly.at(-1) ?? (await store.runs({ agent: agent.id, status: "done", limit: 1 }))[0] ?? null;
+      const lastNightly = nightly.at(-1) ?? (await store.runs({ agent: agent.id, status: "done", limit: 20 })).find((r) => rated(r.summary)) ?? null;
       return {
         agent,
         active,
@@ -98,9 +99,19 @@ export const DAILY_CAPS: { purpose: string; label: string; cap: number }[] = [
   { purpose: "target_eval", label: "Target-agent eval calls", cap: Number(process.env.DAILY_CAP_TARGET_EVAL ?? 600) },
 ];
 
+/** The runner's ledger purposes, grouped into the §15.1 budget lines. */
+export function budgetBucket(purpose: string): string {
+  if (purpose.startsWith("eval_")) return "target_eval";
+  if (purpose === "judge" || purpose === "rubric_judge") return "judge";
+  if (purpose === "cheap_judge" || purpose === "refusal") return "cheap_judge";
+  if (purpose === "prompt_guard" || purpose === "guard") return "guard";
+  if (purpose.startsWith("embed")) return "embedding";
+  return "generation"; // mutation · reflection · cluster_label · draft
+}
+
 export function usageByPurpose(rows: LlmUsage[], day: string) {
   const out: Record<string, number> = {};
-  for (const r of rows) if (r.day === day) out[r.purpose] = (out[r.purpose] ?? 0) + r.calls;
+  for (const r of rows) if (r.day === day) out[budgetBucket(r.purpose)] = (out[budgetBucket(r.purpose)] ?? 0) + r.calls;
   return out;
 }
 
