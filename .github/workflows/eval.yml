@@ -1,0 +1,70 @@
+name: eval
+
+# Manual evaluation of a real target (SPEC §4.2, §14.4 step 5): asks the control plane for a run of the chosen
+# suites — optionally one split — and the control plane dispatches run-suite.yml. Uses the targets' free-tier quota.
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent:
+        description: Target agent
+        type: choice
+        options: [returnpilot, datapilot, toy]
+        default: returnpilot
+      suites:
+        description: "Comma-separated suite ids (empty = regression + red-team seeds)"
+        required: false
+        default: ""
+        type: string
+      split:
+        description: Only cases of this split
+        type: choice
+        options: [all, train, val, test]
+        default: all
+      budget_calls:
+        description: Max target-agent LLM calls for the run
+        required: false
+        default: "300"
+        type: string
+      profile_version:
+        description: "Profile version to run (empty = the active profile)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: ghcr.io/sohail-5678/agentforge-runner:main
+    env:
+      AF_API_URL: ${{ vars.AF_API_URL }}
+      AF_RUNNER_KEY: ${{ secrets.AF_RUNNER_KEY }}
+      AGENT: ${{ inputs.agent }}
+      SUITES: ${{ inputs.suites }}
+      SPLIT: ${{ inputs.split }}
+      BUDGET: ${{ inputs.budget_calls }}
+      PROFILE: ${{ inputs.profile_version }}
+    steps:
+      - name: Mask secrets
+        run: |
+          [ -n "$AF_RUNNER_KEY" ] && echo "::add-mask::$AF_RUNNER_KEY"
+          echo "done"
+      - name: Request the run
+        run: |
+          # Inputs only reach af-run as validated, quoted arguments.
+          echo "$BUDGET" | grep -Eq '^[0-9]{1,4}$' || { echo "budget_calls must be a number"; exit 1; }
+          set -- --agent "$AGENT" --budget-calls "$BUDGET"
+          if [ -n "$SUITES" ]; then
+            echo "$SUITES" | grep -Eq '^[a-z]+/[a-z]+(,[a-z]+/[a-z]+)*$' || { echo "invalid suites"; exit 1; }
+            set -- "$@" --suites "$SUITES"
+          fi
+          [ "$SPLIT" != "all" ] && set -- "$@" --split "$SPLIT"
+          if [ -n "$PROFILE" ]; then
+            echo "$PROFILE" | grep -Eq '^[0-9]{1,3}$' || { echo "profile_version must be a number"; exit 1; }
+            set -- "$@" --profile-version "$PROFILE"
+          fi
+          af-run request "$@"

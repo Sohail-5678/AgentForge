@@ -8,6 +8,7 @@ the agent produced is wrapped in <untrusted_data> and declared as data. Replies 
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -65,6 +66,8 @@ STOP = {
     "were",
     "will",
 }
+
+log = logging.getLogger(__name__)
 
 
 def is_refusal_text(text: str) -> bool:
@@ -207,7 +210,13 @@ def grade(ctx: GradeContext) -> GraderResult:
         return not_applicable("rubric_judge", "no rubric", gating=False)
     if ctx.judge is None or ctx.trace is None:
         return GraderResult("rubric_judge", None, None, {"reason": "judge unavailable"}, 0, gating=False)
-    verdicts = ctx.judge.rubric(items, ctx.trace)
+    try:
+        verdicts = ctx.judge.rubric(items, ctx.trace)
+    except Exception as exc:
+        log.warning("rubric judge unavailable: %s", type(exc).__name__)
+        return GraderResult(
+            "rubric_judge", None, None, {"reason": "judge unavailable", "error": type(exc).__name__}, 0, gating=False
+        )
     ok = all(v.verdict for v in verdicts)
     details = {
         "items": [{"item": v.item, "verdict": v.verdict, "reason": v.reason} for v in verdicts],

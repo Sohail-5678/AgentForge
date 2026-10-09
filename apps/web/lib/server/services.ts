@@ -6,6 +6,7 @@ import type { Case, Profile, ProfileBody, Run, RunSummary, SuiteVersion } from "
 import { computeGateReport } from "./gate";
 import { dispatchRun, setCommitStatus, upsertPrComment } from "./github";
 import { HttpError } from "./http";
+import { targetFor } from "./targets";
 import { getStore } from "./store";
 
 /** Business operations shared by route handlers (SPEC §4). Every admin mutation writes an audit_log row. */
@@ -142,13 +143,7 @@ export async function runnerConfig(runId: string) {
     canaries: canariesFor(run.id),
     budget_calls: run.budget_calls,
     attempts: run.attempts,
-    target: {
-      repo: agent.repo,
-      ref: run.target_ref,
-      workdir: agent.config?.workdir ?? "backend",
-      adapter_module: agent.adapter_module,
-      install: agent.config?.install ?? "uv sync --frozen",
-    },
+    target: targetFor(agent, run.target_ref),
   };
 }
 

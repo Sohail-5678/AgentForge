@@ -19,6 +19,7 @@ from agentforge_runner.execute import RunOutput, execute
 from agentforge_runner.graders.judge import LLMJudge
 from agentforge_runner.llm import LLMClient
 from agentforge_runner.summary import build_summary
+from agentforge_runner.targets.datasets import ensure_bird, needs_bird
 from agentforge_runner.targets.local_adapter import toy_target, toy_workdir
 from agentforge_runner.targets.subprocess_adapter import SubprocessTarget, TargetSpec
 
@@ -124,6 +125,10 @@ def _suite_control_plane(args: argparse.Namespace) -> int:
     cp.start_run(args.run_id, int(gh) if gh and gh.isdigit() else None)
     try:
         with cp.heartbeats(args.run_id), tempfile.TemporaryDirectory(prefix="af-work-") as work:
+            if needs_bird(agent, cfg["cases"]):
+                # DataPilot's BIRD cases read the Mini-Dev databases (the job caches AF_BIRD_CACHE between runs).
+                cache = Path(os.environ.get("AF_BIRD_CACHE") or Path(tempfile.gettempdir()) / "af-bird")
+                os.environ["BIRD_DIR"] = str(ensure_bird(cache, Path(work)))
             target = (
                 toy_target()
                 if agent == "toy"
@@ -313,6 +318,35 @@ def cmd_mine(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_info(args: argparse.Namespace) -> int:
+    """Tell the workflow which agent a run targets (and whether it needs the BIRD cache) before it runs."""
+    cfg = ControlPlane.from_env().get_run(args.run_id)
+    agent = cfg["agent"] if isinstance(cfg["agent"], str) else cfg["agent"]["id"]
+    lines = [f"agent={agent}", f"needs_bird={'true' if needs_bird(agent, cfg['cases']) else 'false'}"]
+    out = os.environ.get("GITHUB_OUTPUT") if args.github_output else None
+    if out:
+        with open(out, "a", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
+def cmd_request(args: argparse.Namespace) -> int:
+    """Ask the control plane for a run (it snapshots the suites and dispatches run-suite.yml)."""
+    body: dict[str, Any] = {"agent": args.agent, "trigger": "manual", "attempts": args.attempts}
+    if args.suites:
+        body["suites"] = [s.strip() for s in args.suites.split(",") if s.strip()]
+    if args.split:
+        body["split"] = args.split
+    if args.budget_calls:
+        body["budget_calls"] = args.budget_calls
+    if args.profile_version:
+        body["profile_version"] = args.profile_version
+    run_id = ControlPlane.from_env().create_run(body)
+    print(f"{args.agent}: run {run_id}")
+    return 0
+
+
 def cmd_nightly(args: argparse.Namespace) -> int:
     cp = ControlPlane.from_env()
     for agent in args.agents.split(","):
@@ -411,6 +445,20 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--post", action="store_true", help="submit drafts to the control plane")
     m.add_argument("--out")
     m.set_defaults(fn=cmd_mine)
+
+    i = sub.add_parser("info", help="which agent a run targets (for workflow conditionals)")
+    i.add_argument("--run-id", required=True)
+    i.add_argument("--github-output", action="store_true", help="also append to $GITHUB_OUTPUT")
+    i.set_defaults(fn=cmd_info)
+
+    q = sub.add_parser("request", help="request a manual run of chosen suites via the API")
+    q.add_argument("--agent", required=True, choices=["datapilot", "returnpilot", "toy"])
+    q.add_argument("--suites", help="comma-separated suite ids (default: the control plane's choice)")
+    q.add_argument("--split", choices=["train", "val", "test"], help="only cases of this split")
+    q.add_argument("--attempts", type=int, default=1)
+    q.add_argument("--budget-calls", type=int)
+    q.add_argument("--profile-version", type=int, help="profile version to run (default: the active one)")
+    q.set_defaults(fn=cmd_request)
 
     n = sub.add_parser("nightly", help="create nightly runs via the API")
     n.add_argument("--agents", default="datapilot,returnpilot")

@@ -3,11 +3,16 @@ import { getStore } from "@/lib/server/store";
 import { handle, json, readJson, requireRunner } from "@/lib/server/http";
 import { createRun } from "@/lib/server/services";
 
-/** POST /runner/runs — used by `af-run nightly` (§4.3): regression (all splits) + red-team core on the active profile. */
+/**
+ * POST /runner/runs — `af-run nightly` (§4.3: regression, all splits + red-team core on the active profile) and
+ * `af-run request` (manual runs of chosen suites, optionally one split) from the eval workflow.
+ */
 const schema = z.object({
   agent: z.string(),
-  suites: z.array(z.string()).optional(),
-  trigger: z.enum(["nightly", "optimizer"]).default("nightly"),
+  suites: z.array(z.string()).max(6).optional(),
+  split: z.enum(["train", "val", "test"]).optional(),
+  profile_version: z.number().int().min(1).optional(),
+  trigger: z.enum(["nightly", "optimizer", "manual"]).default("nightly"),
   attempts: z.number().int().min(1).max(3).default(1),
   budget_calls: z.number().int().min(1).max(2000).optional(),
   experiment_id: z.string().uuid().optional(),
@@ -28,8 +33,9 @@ export const POST = handle(async (req: Request) => {
     actor: "runner",
     attempts: body.attempts,
     budgetCalls: body.budget_calls,
+    profileVersion: body.profile_version,
     experimentId: body.experiment_id ?? null,
-    caseFilter: (c) => c.body.suite !== "redteam" || c.origin === "seed",
+    caseFilter: (c) => (c.body.suite !== "redteam" || c.origin === "seed") && (!body.split || c.split === body.split),
   });
   return json({ run_id: run.id, seq: run.seq, dispatched, reason: dispatchReason }, 201);
 });

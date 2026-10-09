@@ -51,5 +51,30 @@ jobs:
             [ -n "$val" ] && echo "::add-mask::$val"
           done
           echo "done"
+      # Which agent is this run for? (DataPilot BIRD cases need the 801 MB Mini-Dev archive, cached between runs.)
+      - name: Inspect run
+        id: info
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+        run: af-run info --run-id "$RUN_ID" --github-output
+
+      - name: Restore BIRD Mini-Dev archive
+        id: bird
+        if: steps.info.outputs.needs_bird == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /tmp/af-bird
+          key: bird-minidev-zip-v1
+
       - name: Run suite
-        run: af-run suite --run-id "${{ inputs.run_id }}"
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+          AF_BIRD_CACHE: /tmp/af-bird
+        run: af-run suite --run-id "$RUN_ID"
+
+      - name: Save BIRD Mini-Dev archive
+        if: always() && steps.info.outputs.needs_bird == 'true' && steps.bird.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /tmp/af-bird
+          key: bird-minidev-zip-v1

@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import shlex
 import subprocess
 import tempfile
@@ -35,6 +36,23 @@ KEY_MAP: dict[str, dict[str, str]] = {
 }
 PASS_THROUGH = ("PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "UV_CACHE_DIR", "SSL_CERT_FILE")
 NEVER_FORWARD = ("AF_RUNNER_KEY", "AF_GEMINI_API_KEY", "AF_API_URL")
+# Per-agent settings from the control plane (agents.config.env) are plain config, never secrets or core variables.
+_ENV_NAME = re.compile(r"^[A-Z][A-Z0-9_]{1,63}$")
+_ENV_BLOCKED = re.compile(
+    r"(^|_)(KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIALS?|DATABASE_URL|DSN)$"
+    r"|^(PATH|HOME|VIRTUAL_ENV|UV_PROJECT_ENVIRONMENT|PYTHON\w*|LD_\w+|NODE_OPTIONS)$"
+)
+
+
+def safe_settings(settings: dict[str, Any] | None) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for k, v in (settings or {}).items():
+        if _ENV_NAME.match(str(k)) and not _ENV_BLOCKED.search(str(k)) and isinstance(v, (str, int, float, bool)):
+            out[str(k)] = str(v).lower() if isinstance(v, bool) else str(v)
+        else:
+            log.warning("ignoring target setting %r (not a plain config variable)", k)
+    return out
+
 
 Runner = Callable[..., subprocess.CompletedProcess[str]]
 
@@ -47,6 +65,7 @@ class TargetSpec:
     workdir: str
     adapter_module: str
     install: str = "uv sync --frozen"
+    settings: tuple[tuple[str, str], ...] = ()
 
     @classmethod
     def from_run_config(cls, agent: str, target: dict[str, Any]) -> TargetSpec:
@@ -57,12 +76,16 @@ class TargetSpec:
             workdir=str(target.get("workdir") or "."),
             adapter_module=str(target["adapter_module"]),
             install=str(target.get("install") or "uv sync --frozen"),
+            settings=tuple(sorted(safe_settings(target.get("env")).items())),
         )
 
 
-def build_env(agent: str, env: dict[str, str] | None = None, venv: Path | None = None) -> dict[str, str]:
+def build_env(
+    agent: str, env: dict[str, str] | None = None, venv: Path | None = None, settings: dict[str, str] | None = None
+) -> dict[str, str]:
     src = dict(os.environ) if env is None else env
     out = {k: src[k] for k in PASS_THROUGH if k in src}
+    out.update(safe_settings(settings))
     for theirs, ours in KEY_MAP.get(agent, {}).items():
         if src.get(theirs):
             out[ours] = src[theirs]
@@ -118,7 +141,10 @@ class SubprocessTarget:
     def _sh(self, cmd: list[str], cwd: Path, env: dict[str, str] | None = None, timeout: int = 1800) -> None:
         proc = self._run(cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout, check=False)
         if proc.returncode != 0:
-            # Never echo stdout/stderr wholesale: in a public Actions log it could contain case content.
+            # Setup commands (git, uv, npm) never see case content, so their tail is safe to show; the adapter's
+            # own output is never echoed because a public Actions log could leak case data.
+            tail = "\n".join(((proc.stderr or "") + (proc.stdout or "")).strip().splitlines()[-25:])
+            log.error("setup command failed (%s): %s\n%s", proc.returncode, " ".join(cmd[:3]), tail)
             raise RuntimeError(f"{cmd[0]} {cmd[1] if len(cmd) > 1 else ''} failed with exit code {proc.returncode}")
 
     def prepare(self) -> None:
@@ -129,7 +155,7 @@ class SubprocessTarget:
         self._sh(["git", "init", "-q"], self.root)
         self._sh(["git", "fetch", "-q", "--depth", "1", url, self.spec.ref], self.root, timeout=600)
         self._sh(["git", "checkout", "-q", "--detach", "FETCH_HEAD"], self.root)
-        env = build_env(self.agent, venv=self.venv)
+        env = build_env(self.agent, venv=self.venv, settings=dict(self.spec.settings))
         self._sh(["uv", "venv", "-q", str(self.venv)], self.workdir, env)
         self._sh(shlex.split(self.spec.install), self.workdir, env)
         self._prepared = True
@@ -161,7 +187,7 @@ class SubprocessTarget:
             proc = self._run(
                 cmd,
                 cwd=self.workdir,
-                env=build_env(self.agent, venv=self.venv),
+                env=build_env(self.agent, venv=self.venv, settings=dict(self.spec.settings)),
                 capture_output=True,
                 text=True,
                 timeout=self._timeout,
