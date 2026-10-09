@@ -62,7 +62,7 @@ export function PromotionActions({
   return (
     <div className="flex flex-wrap gap-2">
       {state === "candidate" && candidateId && (
-        <button type="button" onClick={() => setOpen("gate")} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-[0_12px_30px_-12px_var(--accent-glow)] transition hover:bg-accent-hi">
+        <button type="button" onClick={() => setOpen("gate")} className="inline-flex items-center gap-2 rounded-full bg-accent-solid px-5 py-2.5 text-sm font-medium text-white shadow-[0_12px_30px_-12px_var(--accent-glow)] transition hover:bg-accent-solid-hi">
           {blocked && <Lock className="size-3.5" />} Send to gate
         </button>
       )}
@@ -71,7 +71,7 @@ export function PromotionActions({
           <button
             type="button"
             onClick={() => setOpen("promote")}
-            className={cn("inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition", canPromote ? "bg-accent text-white shadow-[0_12px_30px_-12px_var(--accent-glow)] hover:bg-accent-hi" : "border border-line-strong text-muted")}
+            className={cn("inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition", canPromote ? "bg-accent-solid text-white shadow-[0_12px_30px_-12px_var(--accent-glow)] hover:bg-accent-solid-hi" : "border border-line-strong text-muted")}
           >
             {blocked ? <Lock className="size-3.5" /> : <Rocket className="size-3.5" />} Promote to active
           </button>
@@ -97,7 +97,7 @@ export function PromotionActions({
                   ? call("/api/v1/promotions", { candidate_id: candidateId }, "Gate runs dispatched")
                   : call(`/api/v1/promotions/${promotionId}/decide`, { decision: open === "promote" ? "promoted" : "rejected" }, open === "promote" ? `v${toVersion} is now active` : "Candidate discarded")
               }
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-full bg-accent-solid px-5 py-2 text-sm font-medium text-white transition hover:bg-accent-solid-hi disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy && <Loader2 className="size-4 animate-spin" />}
               {open === "promote" ? "Promote" : open === "reject" ? "Discard" : "Dispatch gate runs"}

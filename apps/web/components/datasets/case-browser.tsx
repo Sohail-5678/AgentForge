@@ -27,7 +27,7 @@ export function CaseBrowser({ cases }: { cases: Pick<Case, "id" | "suite_id" | "
           {rows.length} cases{rows.length > shown.length ? ` · showing ${shown.length}` : ""}
         </span>
       </div>
-      <div className="max-h-[720px] overflow-auto">
+      <div className="max-h-[720px] overflow-auto" tabIndex={0} role="region" aria-label="Cases">
         <table className="table-af min-w-[860px]">
           <thead>
             <tr>

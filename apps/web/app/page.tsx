@@ -67,7 +67,7 @@ export default async function Landing() {
           <ThemeToggle />
           <Link
             href="/overview"
-            className="group inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-[0.8rem] font-medium text-white shadow-[0_10px_30px_-10px_var(--accent-glow)] transition hover:bg-accent-hi"
+            className="group inline-flex items-center gap-2 rounded-full bg-accent-solid px-4 py-2 text-[0.8rem] font-medium text-white shadow-[0_10px_30px_-10px_var(--accent-glow)] transition hover:bg-accent-solid-hi"
           >
             Live dashboard <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" />
           </Link>
@@ -105,7 +105,7 @@ export default async function Landing() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/overview"
-                className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-white shadow-[0_18px_44px_-14px_var(--accent-glow)] transition duration-300 hover:-translate-y-0.5 hover:bg-accent-hi"
+                className="group inline-flex items-center gap-2 rounded-full bg-accent-solid px-6 py-3 text-sm font-medium text-white shadow-[0_18px_44px_-14px_var(--accent-glow)] transition duration-300 hover:-translate-y-0.5 hover:bg-accent-solid-hi"
               >
                 Open the live dashboard <ArrowRight className="size-4 transition group-hover:translate-x-1" />
               </Link>
@@ -265,18 +265,18 @@ function Swatch({ code, name, value, hex, dark, red }: { code: string; name: str
       className={
         "group relative flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-[6px] p-5 shadow-[0_30px_60px_-30px_rgb(0_0_0/0.8)] ring-1 transition duration-500 hover:-translate-y-1.5 hover:rotate-[-0.6deg] " +
         (red
-          ? "bg-neon text-white ring-white/30"
+          ? "bg-accent-solid text-white ring-white/30"
           : dark
             ? "bg-black text-bone ring-white/25"
             : "bg-surface text-ink ring-line-strong")
       }
     >
-      <span className={"serif text-sm italic " + (red ? "text-white/80" : "text-muted")}>{code}</span>
+      <span className={"serif text-sm italic " + (red ? "text-white" : "text-muted")}>{code}</span>
       <div>
         <p className="display num text-[clamp(2.2rem,3.6vw,3.4rem)] leading-none">{value}</p>
         <p className="serif mt-3 text-[1.3rem] leading-tight">{name}</p>
         <div className={"my-3 h-px " + (red ? "bg-white/40" : "bg-current/20")} />
-        <p className={"font-mono text-[0.6rem] uppercase tracking-[0.2em] " + (red ? "text-white/85" : "text-muted")}>{hex}</p>
+        <p className={"font-mono text-[0.6rem] uppercase tracking-[0.2em] " + (red ? "text-white" : "text-muted")}>{hex}</p>
       </div>
     </div>
   );

@@ -48,7 +48,7 @@ export function KeyCreator() {
         title={created ? "Copy it now" : "Create API key"}
         footer={
           created ? (
-            <button type="button" onClick={() => setOpen(false)} className="rounded-full bg-accent px-5 py-2 text-sm font-medium text-white">
+            <button type="button" onClick={() => setOpen(false)} className="rounded-full bg-accent-solid px-5 py-2 text-sm font-medium text-white">
               I stored it
             </button>
           ) : (
@@ -56,7 +56,7 @@ export function KeyCreator() {
               <button type="button" onClick={() => setOpen(false)} className="rounded-full border border-line-strong px-4 py-2 text-sm text-ink-2">
                 Cancel
               </button>
-              <button type="button" disabled={!!blocked || busy || !scopes.length} onClick={create} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-medium text-white disabled:opacity-40">
+              <button type="button" disabled={!!blocked || busy || !scopes.length} onClick={create} className="inline-flex items-center gap-2 rounded-full bg-accent-solid px-5 py-2 text-sm font-medium text-white disabled:opacity-40">
                 {busy && <Loader2 className="size-4 animate-spin" />} Create
               </button>
             </>

@@ -74,7 +74,12 @@ export default async function RedteamPage() {
             </Card>
             <Card className="rise p-6" style={{ animationDelay: "260ms" }}>
               <p className="kicker">Seed library</p>
-              <Stat label="" value={String(seeds.length)} sub={`${new Set(seeds.map((s) => s.body.category)).size} categories · ${new Set(seeds.map((s) => s.family)).size} families`} className="-mt-2" />
+              <Stat
+                label=""
+                value={String(seeds.filter((s) => s.origin === "seed").length)}
+                sub={`hand-written seeds · + ${seeds.filter((s) => s.origin !== "seed").length} accepted mutations · ${new Set(seeds.map((s) => s.body.category)).size} categories`}
+                className="-mt-2"
+              />
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {CATEGORIES.filter((c) => seeds.some((s) => s.body.category === c.id)).map((c) => (
                   <Chip key={c.id}>{c.owasp}</Chip>

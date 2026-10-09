@@ -143,7 +143,7 @@ export function ReviewCard({ review }: { review: CaseReview }) {
           <button type="button" onClick={() => decide("reject")} disabled={!!busy} className="inline-flex items-center gap-1.5 rounded-full border border-line-strong px-4 py-2 text-[0.8rem] text-ink-2 transition hover:border-accent hover:text-ink disabled:opacity-50">
             {busy === "reject" ? <Loader2 className="size-3.5 animate-spin" /> : blocked ? <Lock className="size-3.5" /> : <X className="size-3.5" />} Reject
           </button>
-          <button type="button" onClick={() => decide("accept")} disabled={!!busy} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-[0.8rem] font-medium text-white transition hover:bg-accent-hi disabled:opacity-50">
+          <button type="button" onClick={() => decide("accept")} disabled={!!busy} className="inline-flex items-center gap-1.5 rounded-full bg-accent-solid px-4 py-2 text-[0.8rem] font-medium text-white transition hover:bg-accent-solid-hi disabled:opacity-50">
             {busy === "accept" ? <Loader2 className="size-3.5 animate-spin" /> : blocked ? <Lock className="size-3.5" /> : <Check className="size-3.5" />} Accept{editing ? " edited" : ""} → regression
           </button>
         </div>

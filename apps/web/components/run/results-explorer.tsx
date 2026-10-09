@@ -119,7 +119,7 @@ export function ResultsExplorer({
               role="tab"
               aria-selected={view === v}
               onClick={() => setView(v)}
-              className={cn("rounded-full px-3 py-1 font-mono text-[0.64rem] uppercase tracking-wider transition", view === v ? "bg-accent text-white" : "text-muted hover:text-ink")}
+              className={cn("rounded-full px-3 py-1 font-mono text-[0.64rem] uppercase tracking-wider transition", view === v ? "bg-accent-solid text-white" : "text-muted hover:text-ink")}
             >
               {v} <span className="opacity-70">{counts[v]}</span>
             </button>

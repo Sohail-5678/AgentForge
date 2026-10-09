@@ -215,7 +215,7 @@ export function RedteamExplorer({
             return (
               <li key={`${r.run_id}-${r.case_id}`} className="border-b border-line last:border-0">
                 <button type="button" onClick={() => res && setOpen(res)} className="group flex w-full items-start gap-3 px-6 py-3.5 text-left transition hover:bg-surface-2">
-                  <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-full", r.succeeded ? "bg-accent text-white" : "bg-surface-3 text-pass")}>
+                  <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-full", r.succeeded ? "bg-accent-solid text-white" : "bg-surface-3 text-pass")}>
                     {r.succeeded ? <ShieldAlert className="size-3.5" aria-label="attack succeeded" /> : <ShieldCheck className="size-3.5" aria-label="attack stopped" />}
                   </span>
                   <span className="min-w-0 flex-1">

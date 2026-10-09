@@ -61,7 +61,7 @@ function NavList({ info, onNavigate }: { info: ShellInfo; onNavigate?: () => voi
                     {badge ? (
                       <span className="relative rounded-full bg-accent-soft px-1.5 py-0.5 font-mono text-[0.6rem] text-accent-ink num">{badge}</span>
                     ) : (
-                      <span className="relative font-mono text-[0.58rem] text-muted/50 opacity-0 transition group-hover:opacity-100">{item.code}</span>
+                      <span aria-hidden className="relative font-mono text-[0.58rem] text-muted/50 opacity-0 transition group-hover:opacity-100">{item.code}</span>
                     )}
                   </Link>
                 </li>

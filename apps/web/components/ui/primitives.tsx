@@ -273,7 +273,7 @@ export function ButtonLink({
       className={cn(
         "inline-flex items-center gap-2 rounded-full px-4 py-2 text-[0.8rem] font-medium transition duration-300",
         variant === "solid"
-          ? "bg-accent text-white shadow-[0_10px_30px_-10px_var(--accent-glow)] hover:bg-accent-hi hover:shadow-[0_14px_40px_-10px_var(--accent-glow)]"
+          ? "bg-accent-solid text-white shadow-[0_10px_30px_-10px_var(--accent-glow)] hover:bg-accent-solid-hi hover:shadow-[0_14px_40px_-10px_var(--accent-glow)]"
           : "border border-line-strong text-ink-2 hover:border-accent hover:text-ink",
         className,
       )}
@@ -289,9 +289,9 @@ export function Meter({ value, max, label, tone }: { value: number; max: number;
   return (
     <div>
       {label && (
-        <div className="mb-1.5 flex justify-between font-mono text-[0.66rem] text-muted num">
-          <span>{label}</span>
-          <span>
+        <div className="mb-1.5 flex flex-wrap justify-between gap-x-3 font-mono text-[0.66rem] text-muted num">
+          <span className="min-w-0">{label}</span>
+          <span className="whitespace-nowrap">
             {value.toLocaleString()} / {max.toLocaleString()} · {pct(frac)}
           </span>
         </div>

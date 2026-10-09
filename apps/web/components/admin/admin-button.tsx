@@ -96,7 +96,7 @@ export function AdminButton({ action, label, className, children }: { action: Ad
               onClick={go}
               className={cn(
                 "inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-40",
-                d.danger ? "bg-accent hover:bg-accent-hi" : "bg-accent hover:bg-accent-hi",
+                "bg-accent-solid hover:bg-accent-solid-hi",
               )}
             >
               {busy && <Loader2 className="size-4 animate-spin" />}

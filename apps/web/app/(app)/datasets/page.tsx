@@ -55,7 +55,7 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                 <p className="display num text-4xl text-ink">{cases.length}</p>
               </div>
               <p className="mt-1 text-[0.76rem] text-muted">{KIND_NOTE[s.kind]}</p>
-              <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-surface-3" aria-label={`train ${split.train}, val ${split.val}, test ${split.test}`}>
+              <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-surface-3" role="img" aria-label={`train ${split.train}, val ${split.val}, test ${split.test}`}>
                 <div className="bg-ink-2/60" style={{ width: `${(split.train / Math.max(1, cases.length)) * 100}%` }} />
                 <div className="bg-info" style={{ width: `${(split.val / Math.max(1, cases.length)) * 100}%` }} />
                 <div className="bg-accent" style={{ width: `${(split.test / Math.max(1, cases.length)) * 100}%` }} />

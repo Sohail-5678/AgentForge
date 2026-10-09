@@ -102,7 +102,7 @@ export function LabelPanel({ agent }: { agent: string }) {
         ) : (
           <span className="text-[0.76rem] text-muted">{viewer.role === "admin" ? "Admin labels count immediately." : "Your labels are stored until an admin accepts them."}</span>
         )}
-        <button type="button" disabled={!done || !!blocked || busy} onClick={submit} className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-[0.8rem] font-medium text-white transition hover:bg-accent-hi disabled:opacity-40">
+        <button type="button" disabled={!done || !!blocked || busy} onClick={submit} className="inline-flex items-center gap-2 rounded-full bg-accent-solid px-4 py-2 text-[0.8rem] font-medium text-white transition hover:bg-accent-solid-hi disabled:opacity-40">
           {busy && <Loader2 className="size-3.5 animate-spin" />} Save {done || ""} label{done === 1 ? "" : "s"}
         </button>
       </div>
