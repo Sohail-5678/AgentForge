@@ -79,7 +79,7 @@ jobs:
       - run: DATABASE_URL="$CI_DATABASE_URL" pnpm --dir apps/web db:migrate
       - run: TEST_DATABASE_URL="$CI_DATABASE_URL" pnpm --dir apps/web test
       # No DATABASE_URL on purpose: the control plane builds and serves the committed demo snapshot read-only (CONTRACTS §0).
-      - run: pnpm --dir apps/web build
+      - run: pnpm --dir apps/web build || { sleep 10; pnpm --dir apps/web build; }
 
   integration:
     name: Integration · runner ⇄ control plane (toy agent, Postgres)
@@ -117,7 +117,8 @@ jobs:
         run: |
           echo "RUNNER_KEY_HASH=$(printf '%s' "$AF_RUNNER_KEY" | sha256sum | cut -d' ' -f1)" >> "$GITHUB_ENV"
           export RUNNER_KEY_HASH=$(printf '%s' "$AF_RUNNER_KEY" | sha256sum | cut -d' ' -f1)
-          pnpm --dir apps/web build
+          # One retry: next/font downloads Google Fonts at build time and a network blip shouldn't fail CI.
+          pnpm --dir apps/web build || { sleep 10; pnpm --dir apps/web build; }
           AUTH_SECRET=ci-only nohup pnpm --dir apps/web start -p 3100 > /tmp/web.log 2>&1 &
           for i in $(seq 1 60); do curl -fsS "$AF_API_URL/api/v1/healthz" && break; sleep 2; done
       - name: Create a run through the runner API and execute it with af-run
