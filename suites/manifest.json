@@ -1,0 +1,340 @@
+{
+  "canonical_json": "json.dumps(body, sort_keys=True, separators=(',', ':'), ensure_ascii=False), UTF-8",
+  "content_hash": "sha256(canonical_json(case))",
+  "generator": "scripts/build_suites.py",
+  "manifest_version": 1,
+  "sources": {
+    "datapilot": {
+      "bench/regression_40.jsonl": "b361ed3018c51383d2b49471be58899a9888eb40174b7b1befaed4af0fa4bab0",
+      "bench/splits.json": "60198d28b9034370a1f7b46246e92603250beb95039157c5f2fda3384418d4b9",
+      "bench/subset_150.jsonl": "ca51ee76f62fafd3c5d97e2f5b8afdbb8ef3e6327d6db009ae4f12cf7971117e",
+      "evals/cases/smoke.jsonl": "7d6901ab987ad8c22e76f92f3aad60ade05a0f23163cbf7437cb3ca45ea942bf"
+    },
+    "returnpilot": {
+      "evals/scenarios.jsonl": "6027d6c3ba335a3c2a506617d6120bf86471a372e64194ef30ceaa916bd9f66a"
+    }
+  },
+  "split_rule": "bucket = int(sha256(case_id).hexdigest(), 16) % 10: 0-5 train, 6-7 val, 8-9 test; red-team seeds hash their family; datapilot/benchmark keeps DataPilot's bench/splits.json",
+  "suites": {
+    "datapilot/benchmark": {
+      "agent": "datapilot",
+      "by_tag": {
+        "bird": 150,
+        "california_schools": 9,
+        "card_games": 16,
+        "challenging": 32,
+        "codebase_community": 15,
+        "debit_card_specializing": 9,
+        "european_football_2": 15,
+        "financial": 10,
+        "formula_1": 20,
+        "moderate": 76,
+        "simple": 42,
+        "student_club": 14,
+        "superhero": 16,
+        "thrombosis_prediction": 15,
+        "toxicology": 11
+      },
+      "files": [
+        "suites/datapilot/benchmark.jsonl"
+      ],
+      "kind": "benchmark",
+      "n": 150,
+      "splits": {
+        "test": 50,
+        "train": 50,
+        "val": 50
+      },
+      "version_hash": "073f02ffe91375973d2395a455fa58f8f7ba0cb60fd8f122c26345a7a682d246"
+    },
+    "datapilot/redteam": {
+      "agent": "datapilot",
+      "by_category": {
+        "data_exfiltration": 5,
+        "direct_injection": 6,
+        "indirect_injection": 5,
+        "misinformation": 6,
+        "system_prompt_extraction": 4,
+        "tool_arg_injection": 4,
+        "unbounded_consumption": 4,
+        "unsafe_sql": 6
+      },
+      "by_category_split": {
+        "data_exfiltration": {
+          "test": 4,
+          "train": 1,
+          "val": 0
+        },
+        "direct_injection": {
+          "test": 1,
+          "train": 3,
+          "val": 2
+        },
+        "indirect_injection": {
+          "test": 2,
+          "train": 2,
+          "val": 1
+        },
+        "misinformation": {
+          "test": 0,
+          "train": 6,
+          "val": 0
+        },
+        "system_prompt_extraction": {
+          "test": 1,
+          "train": 3,
+          "val": 0
+        },
+        "tool_arg_injection": {
+          "test": 1,
+          "train": 3,
+          "val": 0
+        },
+        "unbounded_consumption": {
+          "test": 0,
+          "train": 3,
+          "val": 1
+        },
+        "unsafe_sql": {
+          "test": 0,
+          "train": 6,
+          "val": 0
+        }
+      },
+      "by_severity": {
+        "high": 18,
+        "low": 6,
+        "medium": 16
+      },
+      "by_tag": {
+        "data_exfiltration": 5,
+        "direct_injection": 6,
+        "indirect_injection": 5,
+        "misinformation": 6,
+        "redteam": 40,
+        "system_prompt_extraction": 4,
+        "tool_arg_injection": 4,
+        "unbounded_consumption": 4,
+        "unsafe_sql": 6
+      },
+      "files": [
+        "suites/redteam/datapilot-data_exfiltration.yaml",
+        "suites/redteam/datapilot-direct_injection.yaml",
+        "suites/redteam/datapilot-indirect_injection.yaml",
+        "suites/redteam/datapilot-misinformation.yaml",
+        "suites/redteam/datapilot-system_prompt_extraction.yaml",
+        "suites/redteam/datapilot-tool_arg_injection.yaml",
+        "suites/redteam/datapilot-unbounded_consumption.yaml",
+        "suites/redteam/datapilot-unsafe_sql.yaml"
+      ],
+      "kind": "redteam",
+      "n": 40,
+      "splits": {
+        "test": 9,
+        "train": 27,
+        "val": 4
+      },
+      "version_hash": "e3adc0f0331eb3b2f9a6759a140b37c44e7581938c5a3df808ffbb40c15929b0"
+    },
+    "datapilot/regression": {
+      "agent": "datapilot",
+      "by_tag": {
+        "aggregation": 1,
+        "analysis": 1,
+        "argmax": 1,
+        "bird": 40,
+        "bird-style": 5,
+        "california_schools": 3,
+        "canary": 1,
+        "card_games": 4,
+        "challenging": 9,
+        "checkpoint": 2,
+        "clarify": 1,
+        "codebase_community": 5,
+        "confirm": 1,
+        "count": 1,
+        "data-borne": 1,
+        "debit_card_specializing": 3,
+        "european_football_2": 5,
+        "evidence": 2,
+        "expensive-query": 1,
+        "financial": 2,
+        "formula_1": 5,
+        "injection": 1,
+        "input-guard": 1,
+        "join": 1,
+        "misleading-description": 1,
+        "moderate": 19,
+        "regression-40": 40,
+        "sandbox": 1,
+        "simple": 12,
+        "smoke": 10,
+        "sql-guard": 2,
+        "sql-injection": 1,
+        "student_club": 3,
+        "superhero": 4,
+        "thrombosis_prediction": 3,
+        "time-series": 1,
+        "toxicology": 3
+      },
+      "files": [
+        "suites/datapilot/regression.jsonl"
+      ],
+      "kind": "regression",
+      "n": 50,
+      "splits": {
+        "test": 10,
+        "train": 32,
+        "val": 8
+      },
+      "version_hash": "0e06a18e33dd0b5eb6bbbcb9cbf5f8845e42581b9d2f3ab917aa29459f9cab0e"
+    },
+    "returnpilot/redteam": {
+      "agent": "returnpilot",
+      "by_category": {
+        "data_exfiltration": 5,
+        "direct_injection": 6,
+        "excessive_agency": 6,
+        "indirect_injection": 6,
+        "off_policy_content": 6,
+        "system_prompt_extraction": 6,
+        "tool_arg_injection": 6,
+        "unbounded_consumption": 6
+      },
+      "by_category_split": {
+        "data_exfiltration": {
+          "test": 0,
+          "train": 4,
+          "val": 1
+        },
+        "direct_injection": {
+          "test": 0,
+          "train": 6,
+          "val": 0
+        },
+        "excessive_agency": {
+          "test": 0,
+          "train": 3,
+          "val": 3
+        },
+        "indirect_injection": {
+          "test": 0,
+          "train": 4,
+          "val": 2
+        },
+        "off_policy_content": {
+          "test": 1,
+          "train": 4,
+          "val": 1
+        },
+        "system_prompt_extraction": {
+          "test": 1,
+          "train": 3,
+          "val": 2
+        },
+        "tool_arg_injection": {
+          "test": 1,
+          "train": 4,
+          "val": 1
+        },
+        "unbounded_consumption": {
+          "test": 1,
+          "train": 2,
+          "val": 3
+        }
+      },
+      "by_severity": {
+        "high": 20,
+        "low": 12,
+        "medium": 15
+      },
+      "by_tag": {
+        "data_exfiltration": 5,
+        "direct_injection": 6,
+        "excessive_agency": 6,
+        "indirect_injection": 6,
+        "off_policy_content": 6,
+        "redteam": 47,
+        "system_prompt_extraction": 6,
+        "tool_arg_injection": 6,
+        "unbounded_consumption": 6
+      },
+      "files": [
+        "suites/redteam/returnpilot-data_exfiltration.yaml",
+        "suites/redteam/returnpilot-direct_injection.yaml",
+        "suites/redteam/returnpilot-excessive_agency.yaml",
+        "suites/redteam/returnpilot-indirect_injection.yaml",
+        "suites/redteam/returnpilot-off_policy_content.yaml",
+        "suites/redteam/returnpilot-system_prompt_extraction.yaml",
+        "suites/redteam/returnpilot-tool_arg_injection.yaml",
+        "suites/redteam/returnpilot-unbounded_consumption.yaml"
+      ],
+      "kind": "redteam",
+      "n": 47,
+      "splits": {
+        "test": 4,
+        "train": 30,
+        "val": 13
+      },
+      "version_hash": "ca041436b0f6783452ecde3a19e1a54de637be9b266e8b55709c5d530891ff4c"
+    },
+    "returnpilot/regression": {
+      "agent": "returnpilot",
+      "by_tag": {
+        "approval": 3,
+        "damaged": 1,
+        "electronics": 2,
+        "escalation": 1,
+        "fallback": 1,
+        "final-sale": 2,
+        "international": 2,
+        "memory": 1,
+        "order": 4,
+        "policy": 1,
+        "refund": 7,
+        "return": 7
+      },
+      "files": [
+        "suites/returnpilot/regression.jsonl"
+      ],
+      "kind": "regression",
+      "n": 17,
+      "splits": {
+        "test": 6,
+        "train": 8,
+        "val": 3
+      },
+      "version_hash": "f093726f2726c41c42cd8a21936a90942474d1aa2e7adaa255f45e9bcbbb9a6a"
+    },
+    "returnpilot/scenario": {
+      "agent": "returnpilot",
+      "by_tag": {
+        "approval": 4,
+        "escalation": 1,
+        "injection": 3,
+        "memory": 1,
+        "order": 5,
+        "policy": 6,
+        "refund": 10,
+        "return": 5
+      },
+      "files": [
+        "suites/returnpilot/scenario.jsonl"
+      ],
+      "kind": "scenario",
+      "n": 30,
+      "splits": {
+        "test": 7,
+        "train": 13,
+        "val": 10
+      },
+      "version_hash": "e1bd2c24ce82ac153d97a55e0d1f4ac6aed48f1f94f70d7ca47838179b8d825e"
+    }
+  },
+  "totals": {
+    "cases": 334,
+    "redteam_seeds": 87,
+    "suites": 6
+  },
+  "version_hash": "sha256('\\n'.join(f'{case_id}:{content_hash}' for sorted case ids))"
+}

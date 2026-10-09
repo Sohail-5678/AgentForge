@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentforge/schemas/profile.v1.json",
+  "title": "profile.v1 — the optimizable surface of an agent (SPEC §S.3)",
+  "type": "object",
+  "required": ["contract_version", "agent", "version", "prompts", "locked"],
+  "properties": {
+    "contract_version": { "const": "profile.v1" },
+    "agent": { "enum": ["datapilot", "returnpilot", "toy"] },
+    "version": { "type": "integer", "minimum": 1 },
+    "parent_version": { "type": ["integer", "null"] },
+    "created_by": { "enum": ["human", "optimizer"] },
+    "notes": { "type": ["string", "null"] },
+    "prompts": { "type": "object", "additionalProperties": { "type": "string" } },
+    "tool_descriptions": { "type": "object", "additionalProperties": { "type": "string" } },
+    "few_shots": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "type": "object", "required": ["input", "output"], "properties": { "input": {}, "output": {} } }
+    },
+    "routing": { "type": "object" },
+    "params": { "type": "object" },
+    "locked": { "type": "array", "items": { "type": "string" } }
+  }
+}

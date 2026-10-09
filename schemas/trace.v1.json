@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentforge/schemas/trace.v1.json",
+  "title": "trace.v1 — one target-agent run (SPEC §S.2)",
+  "type": "object",
+  "required": ["contract_version", "trace_id", "agent", "mode", "started_at", "status", "spans", "metrics"],
+  "properties": {
+    "contract_version": { "const": "trace.v1" },
+    "trace_id": { "type": "string", "format": "uuid" },
+    "agent": { "enum": ["datapilot", "returnpilot", "toy"] },
+    "agent_version": { "type": ["string", "null"] },
+    "profile_version": { "type": ["string", "null"] },
+    "mode": { "enum": ["live", "eval"] },
+    "case_id": { "type": ["string", "null"] },
+    "started_at": { "type": "string" },
+    "ended_at": { "type": ["string", "null"] },
+    "status": { "enum": ["success", "failure", "error", "blocked", "needs_human", "budget_exceeded"] },
+    "input": {},
+    "final_output": {},
+    "end_state": {},
+    "spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["span_id", "kind", "name"],
+        "properties": {
+          "span_id": { "type": "string" },
+          "parent_id": { "type": ["string", "null"] },
+          "kind": { "enum": ["node", "llm", "tool", "guard", "retrieval", "human", "sandbox"] },
+          "name": { "type": "string" },
+          "started_at": { "type": ["string", "null"] },
+          "duration_ms": { "type": ["number", "null"] },
+          "provider": { "type": ["string", "null"] },
+          "model": { "type": ["string", "null"] },
+          "tokens_in": { "type": ["integer", "null"] },
+          "tokens_out": { "type": ["integer", "null"] },
+          "status": { "enum": ["ok", "error", "blocked", null] },
+          "error": {},
+          "input_redacted": {},
+          "output_redacted": {},
+          "attributes": { "type": ["object", "null"] }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "llm_calls": { "type": "number" },
+        "tool_calls": { "type": "number" },
+        "tokens_in": { "type": "number" },
+        "tokens_out": { "type": "number" },
+        "latency_ms": { "type": "number" },
+        "list_price_cost_usd": { "type": "number" }
+      }
+    },
+    "feedback": { "type": ["object", "null"] }
+  }
+}

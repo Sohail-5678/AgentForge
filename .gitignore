@@ -1,0 +1,33 @@
+# deps / builds
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# local env & secrets — never commit keys
+.env
+.env.*
+!.env.example
+*.pem
+
+# test output
+test-results/
+playwright-report/
+coverage/
+blob-report/
+
+# runner scratch
+runner/.work/
+runner/out/
+*.log
+.DS_Store
+.vercel

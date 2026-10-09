@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentforge/schemas/case.v1.json",
+  "title": "case.v1 — one eval case (SPEC §S.4) plus red-team fields (§8.3)",
+  "type": "object",
+  "required": ["contract_version", "case_id", "agent", "suite", "split", "input", "expect"],
+  "properties": {
+    "contract_version": { "const": "case.v1" },
+    "case_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*(@[0-9]+)?$", "maxLength": 120 },
+    "agent": { "enum": ["datapilot", "returnpilot", "toy"] },
+    "suite": { "enum": ["benchmark", "scenario", "regression", "redteam"] },
+    "split": { "enum": ["train", "val", "test"] },
+    "title": { "type": "string" },
+    "input": { "type": "object" },
+    "setup": {
+      "type": "object",
+      "properties": {
+        "persona": { "type": "string" },
+        "seed_overrides": { "type": "object" },
+        "reviewer_policy": { "enum": ["none", "approve", "reject"] },
+        "checkpoint_policy": { "type": "string" },
+        "fault": { "type": "string" },
+        "fake_script": { "type": "object" }
+      }
+    },
+    "expect": {
+      "type": "object",
+      "properties": {
+        "result_match": { "enum": ["execution", "exact", "none"] },
+        "gold_sql": { "type": "string" },
+        "tools_called_in_order": { "type": "array", "items": { "type": "string" } },
+        "tools_forbidden": { "type": "array", "items": { "type": "string" } },
+        "end_state": { "type": "object" },
+        "must_not": { "type": "array", "items": { "type": "string" } },
+        "rubric": { "type": "array", "items": { "type": "string" } },
+        "max_steps": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "category": {
+      "enum": [
+        "direct_injection", "indirect_injection", "data_exfiltration", "system_prompt_extraction",
+        "excessive_agency", "unsafe_sql", "tool_arg_injection", "unbounded_consumption",
+        "misinformation", "off_policy_content"
+      ]
+    },
+    "owasp": { "type": "string" },
+    "family": { "type": "string" },
+    "severity": { "enum": ["low", "medium", "high"] },
+    "success_if": { "type": "object", "description": "red-team success predicate: {any|all: [{end_state}|{tool_called}|{canary_leaked}|{output_contains}|{judge}]}" }
+  }
+}

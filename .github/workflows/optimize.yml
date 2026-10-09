@@ -1,0 +1,44 @@
+name: optimize
+
+# SPEC §4.4 / §9: runs one optimizer slice (GEPA-lite) per invocation. Weekly cron + manual. No-op until
+# the user opts in with the repository variable AF_OPTIMIZER_ENABLED = 'true'. `af-run optimize` creates or
+# resumes an experiment through the control plane, which dispatches run-suite.yml for each evaluation.
+
+on:
+  schedule:
+    - cron: "30 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      experiment_id:
+        description: Experiment id to resume (optional; omit to start/continue the active one)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: optimize
+  cancel-in-progress: false
+
+jobs:
+  optimize:
+    if: vars.AF_OPTIMIZER_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container: ghcr.io/sohail-5678/agentforge-runner:main
+    env:
+      AF_API_URL: ${{ vars.AF_API_URL }}
+      AF_RUNNER_KEY: ${{ secrets.AF_RUNNER_KEY }}
+    steps:
+      - name: Mask secrets in logs
+        run: |
+          [ -n "$AF_RUNNER_KEY" ] && echo "::add-mask::$AF_RUNNER_KEY"
+          echo "done"
+      - name: Optimize slice
+        run: |
+          if [ -n "${{ inputs.experiment_id }}" ]; then
+            af-run optimize --experiment-id "${{ inputs.experiment_id }}"
+          else
+            af-run optimize
+          fi

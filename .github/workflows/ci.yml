@@ -1,0 +1,112 @@
+name: ci
+
+# AgentForge's own CI: no live LLM calls (SPEC §13). Third-party actions are pinned to a full commit SHA
+# (SPEC §10.2); the version tag is in the trailing comment. Reuses the SHAs already pinned in the DataPilot
+# and ReturnPilot repos where the same action is used.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runner:
+    name: Runner · ruff + pytest (fake LLM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          enable-cache: true
+      - name: Install (frozen)
+        working-directory: runner
+        run: uv sync --frozen
+      - name: Lint
+        working-directory: runner
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Tests
+        working-directory: runner
+        run: uv run pytest -q
+
+  suites:
+    name: Suites · regenerate check + schema validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: "3.12"
+      # The target repos are not checked out here, so --check validates the committed suite files,
+      # red-team seeds and manifest (and fails if any is invalid or not canonical) without regenerating.
+      - name: Check suites are canonical and valid
+        run: python scripts/build_suites.py --check
+      - name: Suite builder tests
+        run: python scripts/test_build_suites.py
+
+  web:
+    name: Web · lint, typecheck, test, build (read-only snapshot)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env: { POSTGRES_PASSWORD: ci, POSTGRES_DB: agentforge_ci }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+    env:
+      CI_DATABASE_URL: postgresql://postgres:ci@localhost:5432/agentforge_ci
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          version: 9
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: pnpm --dir apps/web install --frozen-lockfile
+      - run: pnpm --dir apps/web lint
+      - run: pnpm --dir apps/web typecheck
+      # Migrations against a throwaway Postgres, then unit tests + the Postgres store integration test.
+      - run: DATABASE_URL="$CI_DATABASE_URL" pnpm --dir apps/web db:migrate
+      - run: TEST_DATABASE_URL="$CI_DATABASE_URL" pnpm --dir apps/web test
+      # No DATABASE_URL on purpose: the control plane builds and serves the committed demo snapshot read-only (CONTRACTS §0).
+      - run: pnpm --dir apps/web build
+
+  e2e:
+    name: E2E · Playwright (chromium)
+    runs-on: ubuntu-latest
+    needs: [web]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          version: 9
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: pnpm --dir apps/web install --frozen-lockfile
+      - name: Install Playwright chromium
+        run: pnpm --dir apps/web exec playwright install --with-deps chromium
+      - run: pnpm --dir apps/web e2e
+
+  gitleaks:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

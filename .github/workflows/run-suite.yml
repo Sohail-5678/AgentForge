@@ -1,0 +1,55 @@
+name: run-suite
+
+# Executes exactly one eval run (SPEC §6.2). The ONLY dispatch input is run_id (SPEC §10.2); the runner
+# fetches cases, profile and keys from the control plane with its secret key. Nothing else is echoed.
+# The image is pinned to a lowercase owner because GHCR requires it (owner Sohail-5678 -> sohail-5678).
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: AgentForge run id (uuid)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One run at a time -> a predictable shared LLM budget; never cancel a run in flight.
+concurrency:
+  group: agent-runs
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    container: ghcr.io/sohail-5678/agentforge-runner:main
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: eval
+          POSTGRES_DB: eval
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+    env:
+      AF_API_URL: ${{ vars.AF_API_URL }}
+      AF_RUNNER_KEY: ${{ secrets.AF_RUNNER_KEY }}
+      EVAL_DATABASE_URL: postgresql://postgres:eval@postgres:5432/eval
+      AF_GEMINI_API_KEY: ${{ secrets.AF_GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      DP_GEMINI_API_KEY: ${{ secrets.DP_GEMINI_API_KEY }}
+      RP_GEMINI_API_KEY: ${{ secrets.RP_GEMINI_API_KEY }}
+      NO_EXTERNAL_SIDE_EFFECTS: "1"
+    steps:
+      - name: Mask secrets in logs
+        shell: bash
+        run: |
+          for v in AF_RUNNER_KEY AF_GEMINI_API_KEY GROQ_API_KEY DP_GEMINI_API_KEY RP_GEMINI_API_KEY; do
+            val="${!v}"
+            [ -n "$val" ] && echo "::add-mask::$val"
+          done
+          echo "done"
+      - name: Run suite
+        run: af-run suite --run-id "${{ inputs.run_id }}"

@@ -1,0 +1,48 @@
+import { changedPaths, wordDiff } from "@/lib/diff";
+import { cn } from "@/lib/format";
+
+/** Per-component diff between two profile.v1 bodies (word-level for text, before/after for params). */
+export function ProfileDiff({ before, after, className, max = 6 }: { before: unknown; after: unknown; className?: string; max?: number }) {
+  const changes = changedPaths(before, after);
+  if (!changes.length) return <p className="text-sm text-muted">No changes.</p>;
+  return (
+    <div className={cn("flex flex-col gap-4", className)}>
+      {changes.slice(0, max).map((c) => {
+        const long = c.before.length + c.after.length > 80;
+        return (
+          <div key={c.path} className="overflow-hidden rounded-xl border border-line">
+            <div className="flex items-center justify-between border-b border-line bg-surface-2 px-3 py-1.5">
+              <code className="font-mono text-[0.68rem] text-ink">{c.path}</code>
+              <span className="font-mono text-[0.6rem] text-muted">
+                {c.before.length} → {c.after.length} chars
+              </span>
+            </div>
+            {long ? (
+              <p className="max-h-72 overflow-auto whitespace-pre-wrap bg-[var(--code-bg)] px-4 py-3 font-mono text-[0.7rem] leading-relaxed text-[#bdb7ae]">
+                {wordDiff(c.before, c.after).map((p, i) =>
+                  p.type === "same" ? (
+                    <span key={i}>{p.text}</span>
+                  ) : p.type === "add" ? (
+                    <ins key={i} className="rounded bg-[rgb(79_209_161/0.18)] px-0.5 text-[#7ef0c2] no-underline">
+                      {p.text}
+                    </ins>
+                  ) : (
+                    <del key={i} className="rounded bg-[rgb(243_46_53/0.18)] px-0.5 text-[#ff8a8f]">
+                      {p.text}
+                    </del>
+                  ),
+                )}
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-px bg-line font-mono text-[0.72rem]">
+                <span className="bg-[var(--code-bg)] px-3 py-2 text-[#ff8a8f] line-through decoration-[#ff8a8f]/50">{c.before || "∅"}</span>
+                <span className="bg-[var(--code-bg)] px-3 py-2 text-[#7ef0c2]">{c.after || "∅"}</span>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {changes.length > max && <p className="font-mono text-[0.64rem] text-muted">+{changes.length - max} more changed fields</p>}
+    </div>
+  );
+}

@@ -1,0 +1,361 @@
+@import "tailwindcss";
+
+/*
+ * Nocturne — AgentForge's design system.
+ * From the reference: 07 Deep Black #08070B · 08 Neon Red #F32E35. Heavy condensed display type (magazine
+ * "ISSUE 08" brutalism), serif names + letter-spaced mono codes on numbered swatch cards, film grain, dotted grids.
+ * Dark is the default (black + neon red); light is bone paper with ink. Every text pair meets WCAG AA.
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root,
+[data-theme="dark"] {
+  --black: #08070b;
+  --neon: #f32e35;
+  --bone: #f3eee7;
+
+  --bg: #08070b;
+  --bg-2: #0b0a0f;
+  --surface: #100f15;
+  --surface-2: #16141c;
+  --surface-3: #1d1a24;
+  --ink: #f3eee7;
+  --ink-2: #c9c3bb;
+  --muted: #8f8982;
+  --line: rgb(243 238 231 / 0.075);
+  --line-strong: rgb(243 238 231 / 0.15);
+  --accent: #f32e35;
+  --accent-hi: #ff5960;
+  --accent-ink: #ff6b71;
+  --accent-soft: rgb(243 46 53 / 0.12);
+  --accent-glow: rgb(243 46 53 / 0.35);
+  --pass: #4fd1a1;
+  --pass-soft: rgb(79 209 161 / 0.12);
+  --warn: #f5b544;
+  --warn-soft: rgb(245 181 68 / 0.13);
+  --info: #8ab4ff;
+  --info-soft: rgb(138 180 255 / 0.13);
+  --violet: #b9a2ff;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.035) inset, 0 30px 60px -30px rgb(0 0 0 / 0.85), 0 2px 10px -4px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 40px 80px -36px rgb(0 0 0 / 0.95), 0 0 0 1px rgb(243 46 53 / 0.18);
+  --grain-opacity: 0.06;
+  --dot: rgb(243 238 231 / 0.09);
+  --code-bg: #0b0a0f;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f2eee8;
+  --bg-2: #ebe6df;
+  --surface: #fbf9f6;
+  --surface-2: #f5f2ed;
+  --surface-3: #ece8e1;
+  --ink: #0b0a0e;
+  --ink-2: #2f2c33;
+  --muted: #625d66;
+  --line: rgb(11 10 14 / 0.09);
+  --line-strong: rgb(11 10 14 / 0.18);
+  --accent: #d11a22;
+  --accent-hi: #e8262e;
+  --accent-ink: #b3141b;
+  --accent-soft: rgb(209 26 34 / 0.08);
+  --accent-glow: rgb(209 26 34 / 0.22);
+  --pass: #0c7a54;
+  --pass-soft: rgb(12 122 84 / 0.1);
+  --warn: #8f5600;
+  --warn-soft: rgb(176 110 0 / 0.12);
+  --info: #2c58c4;
+  --info-soft: rgb(44 88 196 / 0.1);
+  --violet: #6a48d8;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 24px 48px -30px rgb(11 10 14 / 0.28), 0 2px 6px -3px rgb(11 10 14 / 0.12);
+  --shadow-lift: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 34px 64px -32px rgb(11 10 14 / 0.38), 0 0 0 1px rgb(209 26 34 / 0.18);
+  --grain-opacity: 0.045;
+  --dot: rgb(11 10 14 / 0.11);
+  --code-bg: #0b0a0f;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-black: var(--black);
+  --color-neon: var(--neon);
+  --color-bone: var(--bone);
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-hi: var(--accent-hi);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-pass: var(--pass);
+  --color-pass-soft: var(--pass-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-violet: var(--violet);
+  --font-display: var(--font-anton), "Impact", "Haettenschweiler", sans-serif;
+  --font-serif: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  transition: background-color 0.4s var(--ease-smooth), color 0.4s var(--ease-smooth);
+}
+
+/* Film grain over everything (pointer-events none, below toasts/dialogs). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 1.2s steps(4) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(2%, 2%); }
+  100% { transform: translate(0, 0); }
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- type ---------- */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 0.86;
+}
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum", "cv11";
+}
+
+/* Distressed neon title — grain eats into the letterforms like the NOCTURNE print. */
+.grunge {
+  color: var(--accent);
+  --grunge: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='4' seed='11'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -10 0 0 0 7.5'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  -webkit-mask-image: var(--grunge);
+  mask-image: var(--grunge);
+  -webkit-mask-size: 360px 360px;
+  mask-size: 360px 360px;
+}
+
+/* ---------- surfaces ---------- */
+.card {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.022), transparent 40%),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.35s var(--ease-smooth), box-shadow 0.45s var(--ease-smooth), transform 0.45s var(--ease-smooth);
+}
+.card-hover:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-2px);
+}
+/* Cursor spotlight: set --mx/--my from JS (components/ui/spotlight.tsx). */
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-smooth);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft), transparent 45%);
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+.dots {
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+}
+.dots-fade {
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+.hairline {
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+  height: 1px;
+}
+
+.glow-red {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 30px -6px var(--accent-glow);
+}
+
+/* ---------- motion ---------- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.rise {
+  animation: rise 0.9s var(--ease-out-expo) both;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee {
+  animation: marquee 38s linear infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes dash {
+  to { stroke-dashoffset: -200; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: 10px;
+}
+
+/* ---------- tables ---------- */
+.table-af {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem;
+}
+.table-af thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+  text-align: left;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table-af tbody td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.table-af tbody tr {
+  transition: background-color 0.2s var(--ease-smooth);
+}
+.table-af tbody tr:hover {
+  background: var(--surface-2);
+}
+.table-af tbody tr[data-active="true"] {
+  background: var(--accent-soft);
+}
+.table-af tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Recharts polish */
+.recharts-cartesian-grid line {
+  stroke: var(--line);
+}
+.recharts-text {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.recharts-tooltip-cursor {
+  fill: var(--accent-soft);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,67 @@
+# Local development only (SPEC §14.2). In production the control plane uses Neon Postgres and Vercel;
+# nothing here runs in production. Postgres is published on host port 5434 (-> container 5432) so it does
+# not clash with a local Postgres on 5432/5433.
+#
+#   docker compose up postgres web          # control plane + database
+#   docker compose --profile tools run --rm runner suite --agent toy --suite toy/scenario --local --fake-llm
+#
+# With DATABASE_URL set the web app reads Postgres, so migrate + seed once before opening it (CONTRACTS §0):
+#   docker compose exec web bash -lc "pnpm --dir apps/web db:migrate && pnpm --dir apps/web db:seed"
+# Without DATABASE_URL it serves the committed demo snapshot read-only.
+
+name: agentforge
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: agentforge
+      POSTGRES_PASSWORD: agentforge
+      POSTGRES_DB: agentforge
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    image: node:22
+    working_dir: /repo
+    command: >-
+      bash -lc "corepack enable &&
+                pnpm --dir apps/web install &&
+                pnpm --dir apps/web dev"
+    environment:
+      # The compose Postgres, reachable by service name on the compose network (internal port 5432).
+      DATABASE_URL: postgresql://agentforge:agentforge@postgres:5432/agentforge
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "3200:3200"
+    volumes:
+      - .:/repo
+      - web_node_modules:/repo/apps/web/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # `docker compose --profile tools run --rm runner <af-run args>` (the image's entrypoint is af-run).
+  runner:
+    build: ./runner
+    profiles: ["tools"]
+    environment:
+      EVAL_DATABASE_URL: postgresql://agentforge:agentforge@postgres:5432/agentforge
+      AF_API_URL: http://web:3200/api
+    volumes:
+      - .:/repo
+    working_dir: /repo
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  web_node_modules:

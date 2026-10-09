@@ -1,0 +1,32 @@
+name: purge
+
+# SPEC §10.5 / §14.5: daily retention purge. Calls the control plane's admin purge endpoint; the runner key
+# is sent in the Authorization header and never echoed. No-op until the user opts in with the repository
+# variable AF_PURGE_ENABLED = 'true'.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: purge
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    if: vars.AF_PURGE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AF_API_URL: ${{ vars.AF_API_URL }}
+      AF_RUNNER_KEY: ${{ secrets.AF_RUNNER_KEY }}
+    steps:
+      - name: Purge expired data
+        run: |
+          [ -n "$AF_RUNNER_KEY" ] && echo "::add-mask::$AF_RUNNER_KEY"
+          curl -fsS -X POST "$AF_API_URL/api/v1/admin/purge" \
+            -H "Authorization: Bearer $AF_RUNNER_KEY"
