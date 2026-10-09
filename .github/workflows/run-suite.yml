@@ -24,7 +24,11 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 300
-    container: ghcr.io/sohail-5678/agentforge-runner:main
+    container:
+      image: ghcr.io/sohail-5678/agentforge-runner:main
+      # GitHub's step-output and cache files are owned by the host runner user; the image's own non-root user
+      # can't write them. The job VM is thrown away afterwards.
+      options: --user root
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -71,6 +75,12 @@ jobs:
           RUN_ID: ${{ inputs.run_id }}
           AF_BIRD_CACHE: /tmp/af-bird
         run: af-run suite --run-id "$RUN_ID"
+
+      - name: Mark the run failed if the job died before the runner could report
+        if: failure()
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+        run: af-run abort --run-id "$RUN_ID" --reason "run-suite job failed (see the Actions log)" || true
 
       - name: Save BIRD Mini-Dev archive
         if: always() && steps.info.outputs.needs_bird == 'true' && steps.bird.outputs.cache-hit != 'true'

@@ -331,6 +331,18 @@ def cmd_info(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_abort(args: argparse.Namespace) -> int:
+    """Close a run the job could not execute (only if it has not already finished)."""
+    cp = ControlPlane.from_env()
+    run = cp.get_run(args.run_id)["run"]
+    if run.get("status") in ("done", "failed", "cancelled"):
+        print(f"run already {run['status']}")
+        return 0
+    cp.finish_run(args.run_id, error=args.reason[:300])
+    print("run marked failed")
+    return 0
+
+
 def cmd_request(args: argparse.Namespace) -> int:
     """Ask the control plane for a run (it snapshots the suites and dispatches run-suite.yml)."""
     body: dict[str, Any] = {"agent": args.agent, "trigger": "manual", "attempts": args.attempts}
@@ -450,6 +462,11 @@ def build_parser() -> argparse.ArgumentParser:
     i.add_argument("--run-id", required=True)
     i.add_argument("--github-output", action="store_true", help="also append to $GITHUB_OUTPUT")
     i.set_defaults(fn=cmd_info)
+
+    ab = sub.add_parser("abort", help="mark a run failed when its job could not execute it")
+    ab.add_argument("--run-id", required=True)
+    ab.add_argument("--reason", default="run-suite job failed")
+    ab.set_defaults(fn=cmd_abort)
 
     q = sub.add_parser("request", help="request a manual run of chosen suites via the API")
     q.add_argument("--agent", required=True, choices=["datapilot", "returnpilot", "toy"])
