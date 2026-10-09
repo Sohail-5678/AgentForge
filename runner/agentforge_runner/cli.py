@@ -317,10 +317,11 @@ def cmd_nightly(args: argparse.Namespace) -> int:
     cp = ControlPlane.from_env()
     for agent in args.agents.split(","):
         budget = int(os.environ.get(f"NIGHTLY_CALLS_{agent.upper()}", "300"))
+        # Suites are chosen by the control plane (§4.3): the agent's regression suite (or its scenario/benchmark
+        # suites when it has none, e.g. the toy agent) plus the red-team seed set.
         run_id = cp.create_run(
             {
                 "agent": agent,
-                "suites": [f"{agent}/regression", f"{agent}/redteam"],
                 "trigger": "nightly",
                 "attempts": 1,
                 "budget_calls": budget,

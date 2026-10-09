@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: "30 7 * * *"
   workflow_dispatch:
+    inputs:
+      agents:
+        description: Comma-separated agents (datapilot, returnpilot, toy)
+        required: false
+        default: datapilot,returnpilot
+        type: string
 
 permissions:
   contents: read
@@ -18,17 +24,22 @@ concurrency:
 
 jobs:
   nightly:
-    if: vars.AF_NIGHTLY_ENABLED == 'true'
+    # The schedule is opt-in (AF_NIGHTLY_ENABLED); a manual dispatch always runs.
+    if: github.event_name == 'workflow_dispatch' || vars.AF_NIGHTLY_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container: ghcr.io/sohail-5678/agentforge-runner:main
     env:
       AF_API_URL: ${{ vars.AF_API_URL }}
       AF_RUNNER_KEY: ${{ secrets.AF_RUNNER_KEY }}
+      AGENTS: ${{ inputs.agents || 'datapilot,returnpilot' }}
     steps:
       - name: Mask secrets in logs
         run: |
           [ -n "$AF_RUNNER_KEY" ] && echo "::add-mask::$AF_RUNNER_KEY"
           echo "done"
       - name: Create nightly runs
-        run: af-run nightly
+        run: |
+          # The input only ever reaches af-run as a validated, quoted argument.
+          echo "$AGENTS" | grep -Eq '^[a-z]+(,[a-z]+)*$' || { echo "invalid agents list"; exit 1; }
+          af-run nightly --agents "$AGENTS"

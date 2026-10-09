@@ -78,7 +78,8 @@ def test_nightly_creates_runs(mock_api):
     assert cli.main(["nightly"]) == 0
     created = [b for m, p, b in mock_api if p == "/api/v1/runner/runs"]
     assert [b["agent"] for b in created] == ["datapilot", "returnpilot"]
-    assert all(b["trigger"] == "nightly" and b["suites"][1].endswith("/redteam") for b in created)
+    # Suite selection is the control plane's job (regression or scenario/benchmark + red-team seeds).
+    assert all(b["trigger"] == "nightly" and "suites" not in b for b in created)
 
 
 def test_local_redteam_with_mutations(tmp_path):
