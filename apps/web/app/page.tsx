@@ -125,8 +125,13 @@ export default async function Landing() {
           <div className="rise grid grid-cols-2 gap-4" style={{ animationDelay: "240ms" }}>
             <Swatch code="07" name="Cases under test" value={s.cases.toLocaleString()} hex={`${s.suites} suites`} dark />
             <Swatch code="08" name="Attack seeds" value={s.seeds.toLocaleString()} hex={`${s.categories} OWASP categories`} red />
-            <Swatch code="09" name="Judge agreement (Cohen’s κ)" value={s.kappa != null ? s.kappa.toFixed(2) : "—"} hex={s.kappaN ? `n=${s.kappaN} blind labels` : "not calibrated"} />
-            <Swatch code="10" name="Gated promotions" value={String(s.promotions)} hex={`${s.runs.toLocaleString()} runs graded`} />
+            <Swatch code="09" name={`Judge agreement (Cohen’s κ)${s.synthetic ? " *" : ""}`} value={s.kappa != null ? s.kappa.toFixed(2) : "—"} hex={s.kappaN ? `n=${s.kappaN} blind labels` : "not calibrated"} />
+            <Swatch code="10" name={`Gated promotions${s.synthetic ? " *" : ""}`} value={String(s.promotions)} hex={`${s.runs.toLocaleString()} runs graded`} />
+            {s.synthetic && (
+              <p className="col-span-2 font-mono text-[0.6rem] leading-relaxed tracking-wide text-muted">
+                * from the demo history: simulated DataPilot/ReturnPilot behaviour scored by AgentForge&apos;s real graders, statistics and gate — not measurements of the live apps.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -154,9 +159,9 @@ export default async function Landing() {
             better prompts — which go live only through the gate.
           </p>
           <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3">
-            <Fact k="Test-split gain" v={s.bestGain != null ? `${s.bestGain > 0 ? "+" : ""}${(s.bestGain * 100).toFixed(0)} pts` : "—"} sub="best promoted candidate" />
-            <Fact k="Attack success" v={s.asr != null ? pct(s.asr, 1) : "—"} sub="ReturnPilot, last nightly" />
-            <Fact k="List-price cost" v={s.costPerCase != null ? `$${s.costPerCase.toFixed(4)}` : "—"} sub="per case · actual spend $0" />
+            <Fact k="Test-split gain" v={s.bestGain != null ? `${s.bestGain > 0 ? "+" : ""}${(s.bestGain * 100).toFixed(0)} pts` : "—"} sub={`best promoted candidate${s.synthetic ? " · demo *" : ""}`} />
+            <Fact k="Attack success" v={s.asr != null ? pct(s.asr, 1) : "—"} sub={`ReturnPilot, last nightly${s.synthetic ? " · demo *" : ""}`} />
+            <Fact k="List-price cost" v={s.costPerCase != null ? `$${s.costPerCase.toFixed(4)}` : "—"} sub={`per case · actual spend $0${s.synthetic ? " · demo *" : ""}`} />
           </dl>
         </div>
         <div className="relative mx-auto w-full max-w-[640px]">

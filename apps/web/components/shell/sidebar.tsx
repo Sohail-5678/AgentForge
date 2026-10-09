@@ -84,7 +84,7 @@ function Footer({ info }: { info: ShellInfo }) {
         </div>
         <p className="mt-1.5 text-[0.72rem] leading-snug text-muted">
           {info.mode === "postgres"
-            ? "Control plane connected to Postgres. Runs execute in GitHub Actions."
+            ? "Control plane on Neon Postgres. Demo history is labelled simulated; real runs execute in GitHub Actions."
             : "Read-only synthetic history produced by af-run demo. Live runs appear once the database is connected."}
         </p>
       </div>

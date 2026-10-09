@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card, CiBar, Empty, PageHeader, RunStatusChip, TriggerChip } from "@/components/ui/primitives";
+import { Card, Chip, CiBar, Empty, PageHeader, RunStatusChip, TriggerChip } from "@/components/ui/primitives";
 import { FilterBar } from "@/components/ui/filter-bar";
 import { ago, ms, pct, qualityN, rated, sha, usd } from "@/lib/format";
 import { agentName } from "@/lib/meta";
@@ -91,7 +91,11 @@ export default async function RunsPage({ searchParams }: { searchParams: Promise
                       <td className="font-mono text-[0.72rem] text-ink-2">v{prof?.version ?? "?"}</td>
                       <td className="font-mono text-[0.72rem] text-muted">{sha(r.target_ref)}</td>
                       <td>
-                        <RunStatusChip status={r.status} />
+                        <span className="flex flex-col items-start gap-1">
+                          <RunStatusChip status={r.status} />
+                          {s?.synthetic && <Chip tone="warn">simulated</Chip>}
+                          {s?.fake_llm && <Chip tone="info">fake LLM</Chip>}
+                        </span>
                       </td>
                       <td>
                         {rs ? (

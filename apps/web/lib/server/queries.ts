@@ -38,6 +38,7 @@ export const landingStats = cache(async () => {
     bestGain: gains.length ? Math.max(...gains) : null,
     asr: last?.redteam?.asr ?? null,
     costPerCase: last?.cost?.mean_list_price_usd ?? null,
+    synthetic: store.mode === "snapshot" || !!last?.synthetic,
   };
 });
 

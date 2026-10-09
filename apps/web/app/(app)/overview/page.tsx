@@ -93,7 +93,10 @@ export default async function OverviewPage() {
                     </Link>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
-                    {c.active && <Chip tone="accent">profile v{c.active.version}</Chip>}
+                    <div className="flex gap-1.5">
+                      {c.lastNightly?.summary?.synthetic && <Chip tone="warn">simulated</Chip>}
+                      {c.active && <Chip tone="accent">profile v{c.active.version}</Chip>}
+                    </div>
                     <span className="font-mono text-[0.6rem] text-muted">{c.active?.created_by === "optimizer" ? "optimizer-made" : "human-made"}</span>
                   </div>
                 </div>
