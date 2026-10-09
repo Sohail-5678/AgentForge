@@ -1,6 +1,6 @@
 # AgentForge — evaluate, red-team and optimize AI agents
 
-**Live:** https://agentforge-eval.vercel.app · **Spec:** [`docs/SPEC.md`](docs/SPEC.md) · **Contracts:** [`docs/CONTRACTS.md`](docs/CONTRACTS.md)
+**Live:** https://agentforge-eval.vercel.app · **Spec:** [`docs/SPEC.md`](docs/SPEC.md) · **Contracts:** [`docs/CONTRACTS.md`](docs/CONTRACTS.md) · **Plain-English guide:** [`EXPLAINER.md`](EXPLAINER.md)
 
 AgentForge is an **agent quality platform**. It collects traces from live agents, turns failures into test cases, runs
 suites and red-team attacks against any agent that implements a small eval adapter, grades every run with deterministic
