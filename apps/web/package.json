@@ -12,7 +12,8 @@
     "e2e": "playwright test",
     "db:migrate": "node scripts/migrate.mjs",
     "db:seed": "node scripts/seed.mjs",
-    "keys:create": "node scripts/create-key.mjs"
+    "keys:create": "node scripts/create-key.mjs",
+    "db:deploy": "node scripts/db-deploy.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.1.0",
@@ -51,5 +52,7 @@
     "vitest": "5.0.3"
   },
   "packageManager": "pnpm@9.15.9",
-  "engines": { "node": ">=20.9.0" }
+  "engines": {
+    "node": ">=20.9.0"
+  }
 }
