@@ -31,7 +31,3 @@ runner/out/
 *.log
 .DS_Store
 .vercel
-
-# private notes — kept locally, never published
-CLAUDE.md
-EXPLAINER.md
